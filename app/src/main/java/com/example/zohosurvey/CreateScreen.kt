@@ -79,17 +79,18 @@ fun AddingScreen(navController: NavHostController) {
                 .background(Color.White)
                 .verticalScroll(rememberScrollState())
         ) {
-            ElevatedCard(colors = CardDefaults.elevatedCardColors(
-                containerColor = Color(0xFFF8F6F6)
-            ),
+            ElevatedCard(
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = Color(0xFFF8F6F6)
+                ),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 6.dp
                 ),
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp, horizontal = 14.dp),
-                onClick = {}) {
+                    .padding(vertical = 16.dp, horizontal = 14.dp)
+            ) {
                 //name text
                 Column {
                     Text(
@@ -120,7 +121,8 @@ fun AddingScreen(navController: NavHostController) {
                             }) {
                                 Icon(imageVector = Icons.Filled.Clear, contentDescription = "clear")
                             }
-                        })
+                        }
+                    )
                     Spacer(modifier = Modifier.padding(8.dp))
                     //category
                     Button(border = BorderStroke(1.dp, Color.Black),
