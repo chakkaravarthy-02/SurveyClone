@@ -1,4 +1,4 @@
-package com.example.zohosurvey
+package com.example.zohosurvey.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

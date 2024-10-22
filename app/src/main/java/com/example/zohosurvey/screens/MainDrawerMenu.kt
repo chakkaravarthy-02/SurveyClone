@@ -1,4 +1,4 @@
-package com.example.zohosurvey
+package com.example.zohosurvey.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.sharp.Settings
 import androidx.compose.material.icons.sharp.Share
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,9 +40,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.zohosurvey.HorizontalLine
+import com.example.zohosurvey.R
+import com.example.zohosurvey.VerticalLine
 
 @Composable
-fun DrawerContent(onItemClicked: () -> Unit) {
+fun DrawerContent(onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit) {
 
     val widthDp = 400.dp
 
@@ -123,7 +124,9 @@ fun DrawerContent(onItemClicked: () -> Unit) {
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically){
-                        IconButton(onClick = {}) {
+                        IconButton(onClick = {
+                            onDepartmentClicked()
+                        }) {
                             Icon(
                                 imageVector = Icons.Filled.KeyboardArrowRight,
                                 contentDescription = "keyboard right arrow"
@@ -269,30 +272,14 @@ fun DrawerBalanceContent(iconVector: ImageVector, content: String, onItemClicked
     }
 }
 
-@Composable
-fun VerticalLine(value: Int) {
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp,
-        modifier = Modifier
-            .height(value.dp)
-            .width(1.dp)
-    )
-}
-
-@Composable
-fun HorizontalLine() {
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp
-    )
-}
-
 @Preview
 @Composable
 private fun DrawerPreview() {
     DrawerContent(
-        onItemClicked = {}
+        onItemClicked = {},
+        onDepartmentClicked = {
+            var departmentMenu = true
+        }
     )
 }
 

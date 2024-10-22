@@ -1,4 +1,4 @@
-package com.example.zohosurvey
+package com.example.zohosurvey.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.runtime.LaunchedEffect
