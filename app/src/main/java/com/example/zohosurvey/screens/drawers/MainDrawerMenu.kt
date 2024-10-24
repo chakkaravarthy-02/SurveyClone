@@ -1,4 +1,4 @@
-package com.example.zohosurvey.screens
+package com.example.zohosurvey.screens.drawers
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,9 +40,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.zohosurvey.HorizontalLine
 import com.example.zohosurvey.R
-import com.example.zohosurvey.VerticalLine
+import com.example.zohosurvey.screens.HorizontalLine
+import com.example.zohosurvey.screens.VerticalLine
 
 @Composable
 fun DrawerContent(onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit) {
@@ -134,7 +134,7 @@ fun DrawerContent(onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit) {
                         }
                         VerticalLine(70)
                         IconButton(modifier = Modifier
-                            .padding(start = 8.dp)
+                            .padding(start = 12.dp)
                             .align(Alignment.CenterVertically),
                             onClick = {},
                         ) {

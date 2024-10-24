@@ -1,4 +1,4 @@
-package com.example.zohosurvey.screens
+package com.example.zohosurvey.screens.drawers
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
