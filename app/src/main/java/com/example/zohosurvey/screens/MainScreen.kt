@@ -61,6 +61,7 @@ import com.example.zohosurvey.R
 import com.example.zohosurvey.checkInternetConnection
 import com.example.zohosurvey.screens.drawers.DepartmentDrawerContent
 import com.example.zohosurvey.screens.drawers.DrawerContent
+import com.example.zohosurvey.viewmodelfactorys.MainFactory
 import com.example.zohosurvey.viewmodels.MainViewModel
 import kotlinx.coroutines.launch
 
@@ -152,7 +153,8 @@ fun FilterDialog(onClick: () -> Unit, viewModel: MainViewModel = viewModel()) {
 }
 
 @Composable
-fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostController,viewModel: MainViewModel = viewModel()) {
+fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostController,viewModel: MainViewModel = viewModel(factory = MainFactory(
+    LocalContext.current))) {
     val context = LocalContext.current
     val isConnected = rememberSaveable {
         mutableStateOf(checkInternetConnection(context))
@@ -191,7 +193,7 @@ fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostContro
                     scope.launch { openDrawer.close() }
                 })
             } else{
-                DrawerContent(onDepartmentClicked = {
+                DrawerContent(navController,onDepartmentClicked = {
                     departmentMenu = true
                 },onItemClicked = {
                     scope.launch { openDrawer.close() }

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -72,5 +73,5 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
-
+    kapt("androidx.room:room-compiler:2.6.1")
 }

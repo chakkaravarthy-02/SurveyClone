@@ -34,18 +34,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.zohosurvey.R
 import com.example.zohosurvey.screens.HorizontalLine
 import com.example.zohosurvey.screens.VerticalLine
+import com.example.zohosurvey.viewmodelfactorys.MainDrawerFactory
+import com.example.zohosurvey.viewmodels.MainDrawerViewModel
 
 @Composable
-fun DrawerContent(onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit) {
+fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit) {
 
     val widthDp = 400.dp
 
@@ -208,22 +214,33 @@ fun DrawerContent(onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit) {
                 }
                 HorizontalLine()
                 DrawerBalanceContent(Icons.Sharp.Share, "Shared with me", onItemClicked)
-                DrawerBalanceIntContent(R.drawable.verified_user_24px, "Data Permission",onItemClicked)
-                DrawerBalanceIntContent(R.drawable.help_24px, "Help", onItemClicked)
+                DrawerBalanceIntContent(navController,R.drawable.verified_user_24px, "Data Permission",onItemClicked)
+                DrawerBalanceIntContent(navController,R.drawable.help_24px, "Help", onItemClicked)
                 DrawerBalanceContent(Icons.Filled.Lock, "Privacy Policy", onItemClicked)
                 DrawerBalanceContent(Icons.Sharp.Settings, "Settings", onItemClicked)
-                DrawerBalanceIntContent(R.drawable.logout_24px, "Log Out", onItemClicked)
+                DrawerBalanceIntContent(navController,R.drawable.logout_24px, "Log Out", onItemClicked)
             }
         }
     }
 }
 
 @Composable
-fun DrawerBalanceIntContent(vectorInt: Int, content: String, onItemClicked: () -> Unit) {
+fun DrawerBalanceIntContent(navController: NavHostController,vectorInt: Int, content: String, onItemClicked: () -> Unit,mainDrawerViewModel: MainDrawerViewModel = viewModel( factory = MainDrawerFactory(
+    LocalContext.current)
+)) {
     Row(
         modifier = Modifier
             .clickable {
                 onItemClicked()
+                when (content) {
+                    "Log Out" -> {
+                        navController.navigate("AboutScreen")
+                        mainDrawerViewModel.logout()
+                    }
+
+                    "Help" -> {}
+                    "Data Permission" -> {}
+                }
             }
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
@@ -251,6 +268,11 @@ fun DrawerBalanceContent(iconVector: ImageVector, content: String, onItemClicked
         modifier = Modifier
             .clickable {
                 onItemClicked()
+                when (content) {
+                    "Shared with me" -> {}
+                    "Privacy Policy" -> {}
+                    "Settings" -> {}
+                }
             }
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
@@ -276,6 +298,7 @@ fun DrawerBalanceContent(iconVector: ImageVector, content: String, onItemClicked
 @Composable
 private fun DrawerPreview() {
     DrawerContent(
+        rememberNavController(),
         onItemClicked = {},
         onDepartmentClicked = {
             var departmentMenu = true

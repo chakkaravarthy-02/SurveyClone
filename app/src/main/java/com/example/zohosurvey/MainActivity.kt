@@ -8,8 +8,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +26,8 @@ import com.example.zohosurvey.screens.login.AboutScreen
 import com.example.zohosurvey.screens.login.LoginScreen
 import com.example.zohosurvey.screens.login.SignupScreen
 import com.example.zohosurvey.ui.theme.ZohoSurveyTheme
+import com.example.zohosurvey.viewmodelfactorys.MainFactory
+import com.example.zohosurvey.viewmodels.MainViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
@@ -34,8 +42,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(modifier: Modifier = Modifier) {
-    val isLogin = false
+fun MyApp(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel(factory = MainFactory(
+    LocalContext.current))) {
+
     val systemUiController = rememberSystemUiController()
     SideEffect {
         systemUiController.setSystemBarsColor(
@@ -45,19 +54,28 @@ fun MyApp(modifier: Modifier = Modifier) {
             color = Color.Black
         )
     }
+
     val navController = rememberNavController()
 
-    if(isLogin) {
+    mainViewModel.checkUserLoggedIn()
+
+    if(mainViewModel.isLogin.value) {
         NavHost(navController = navController, startDestination = "MainScreen") {
             composable("MainScreen") { EntireMainScreen(navController = navController) }
             composable("AddingScreen") { AddingScreen(navController) }
             composable("SearchScreen") { SearchScreen(navController) }
+            composable("AboutScreen") { AboutScreen(navController) }
+            composable("LoginScreen") { LoginScreen(navController, mainViewModel = mainViewModel) }
+            composable("SignUpScreen") { SignupScreen(navController) }
         }
     }else{
         NavHost(navController = navController, startDestination = "AboutScreen") {
             composable("AboutScreen") { AboutScreen(navController) }
-            composable("LoginScreen") { LoginScreen(navController) }
+            composable("LoginScreen") { LoginScreen(navController, mainViewModel = mainViewModel) }
             composable("SignUpScreen") { SignupScreen(navController) }
+            composable("MainScreen") { EntireMainScreen(navController = navController) }
+            composable("AddingScreen") { AddingScreen(navController) }
+            composable("SearchScreen") { SearchScreen(navController) }
         }
     }
 }
