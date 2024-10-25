@@ -70,6 +70,7 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.36.0" )
     implementation ("com.google.accompanist:accompanist-pager:0.30.1")
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
-
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
 
 }

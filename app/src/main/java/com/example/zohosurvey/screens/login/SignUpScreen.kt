@@ -160,7 +160,7 @@ fun SignupScreen(navController: NavHostController) {
                         }
                     )
 
-                    Spacer(modifier = Modifier.padding(8.dp))
+                    Spacer(modifier = Modifier.padding(2.dp))
                     TextField(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -191,7 +191,7 @@ fun SignupScreen(navController: NavHostController) {
                         }
                     )
 
-                    Spacer(modifier = Modifier.padding(8.dp))
+                    Spacer(modifier = Modifier.padding(2.dp))
                     TextField(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         colors = TextFieldDefaults.colors(
