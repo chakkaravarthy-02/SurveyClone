@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -60,7 +62,10 @@ import com.example.zohosurvey.viewmodelfactorys.SignUpFactory
 import com.example.zohosurvey.viewmodels.SignUpViewModel
 
 @Composable
-fun SignupScreen(navController: NavHostController,signUpViewModel: SignUpViewModel = viewModel(factory = SignUpFactory(LocalContext.current.applicationContext as Application))) {
+fun SignupScreen(
+    navController: NavHostController,
+    signUpViewModel: SignUpViewModel = viewModel(factory = SignUpFactory(LocalContext.current.applicationContext as Application))
+) {
     val context = LocalContext.current
 
     var emailText by rememberSaveable {
@@ -77,6 +82,25 @@ fun SignupScreen(navController: NavHostController,signUpViewModel: SignUpViewMod
     }
     var passwordVisible by rememberSaveable {
         mutableStateOf(false)
+    }
+    var inserted by rememberSaveable {
+        mutableStateOf(true)
+    }
+
+    LaunchedEffect(Unit) {
+        signUpViewModel.insertStatus.collect { isInserted ->
+            inserted = isInserted
+            if (isInserted) {
+                navController.navigate("AboutScreen") {
+                    popUpTo("AboutScreen") {
+                        inclusive = true
+                    }
+                }
+                Toast.makeText(context, "Data saved", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Error saving data", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     Box(
@@ -122,7 +146,7 @@ fun SignupScreen(navController: NavHostController,signUpViewModel: SignUpViewMod
                             contentDescription = "logo"
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(fontSize = 10.sp,text = "Have a Zoho account?")
+                            Text(fontSize = 10.sp, text = "Have a Zoho account?")
                             Text(modifier = Modifier.clickable {
                                 navController.navigate("LoginScreen")
                             }, fontSize = 10.sp, color = Color(0xFFFE5B54), text = "SIGNIN")
@@ -171,7 +195,7 @@ fun SignupScreen(navController: NavHostController,signUpViewModel: SignUpViewMod
                     Spacer(modifier = Modifier.padding(2.dp))
                     TextField(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = Color.Black,
                             unfocusedTextColor = Color.LightGray,
@@ -193,8 +217,11 @@ fun SignupScreen(navController: NavHostController,signUpViewModel: SignUpViewMod
                             Text(text = "Password*")
                         },
                         trailingIcon = {
-                            IconButton(onClick = {passwordVisible = !passwordVisible}) {
-                                Icon(painter = painterResource(id = if(passwordVisible) R.drawable.baseline_visibility_24 else R.drawable.baseline_visibility_off_24), contentDescription = "Password visibility")
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    painter = painterResource(id = if (passwordVisible) R.drawable.baseline_visibility_24 else R.drawable.baseline_visibility_off_24),
+                                    contentDescription = "Password visibility"
+                                )
                             }
                         }
                     )
@@ -234,16 +261,24 @@ fun SignupScreen(navController: NavHostController,signUpViewModel: SignUpViewMod
                             modifier = Modifier
                                 .clickable { agree = !agree },
                             checked = agree,
-                            onCheckedChange = {new -> agree = new },
+                            onCheckedChange = { new -> agree = new },
                         )
                         Row(
                             horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(fontSize = 10.sp, text = " I agree to the ")
-                            Text(fontSize = 10.sp,color = Color(0xFF1871B8), text = "Terms of service")
-                            Text(fontSize = 10.sp,text = " and ")
-                            Text(fontSize = 10.sp,color = Color(0xFF1871B8), text = "Privacy Policy")
+                            Text(
+                                fontSize = 10.sp,
+                                color = Color(0xFF1871B8),
+                                text = "Terms of service"
+                            )
+                            Text(fontSize = 10.sp, text = " and ")
+                            Text(
+                                fontSize = 10.sp,
+                                color = Color(0xFF1871B8),
+                                text = "Privacy Policy"
+                            )
                         }
                     }
 
@@ -255,25 +290,26 @@ fun SignupScreen(navController: NavHostController,signUpViewModel: SignUpViewMod
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
                         onClick = {
-                            if(agree){
-                                if(emailText.isNotEmpty() && passwordText.isNotEmpty() && phoneNumberText.isNotEmpty()){
-                                    val inserted = signUpViewModel.insertUserDetails(emailText,passwordText,phoneNumberText)
-                                    if(inserted) {
-                                        navController.navigate("AboutScreen") {
-                                            popUpTo("AboutScreen") {
-                                                inclusive = true
-                                            }
-                                        }
-                                        Toast.makeText(context,"Data saved",Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        Toast.makeText(context, "Error in inserting... Try again", Toast.LENGTH_SHORT)
-                                            .show()
-                                    }
-                                }else{
-                                    Toast.makeText(context,"All fields are required",Toast.LENGTH_SHORT).show()
+                            if (agree) {
+                                if (emailText.isNotEmpty() && passwordText.isNotEmpty() && phoneNumberText.isNotEmpty()) {
+                                    signUpViewModel.insertUserDetails(
+                                        emailText,
+                                        passwordText,
+                                        phoneNumberText
+                                    )
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "All fields are required",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
-                            }else{
-                                Toast.makeText(context,"Please read terms and policy and check that",Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Please read terms and policy and check that",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     ) {

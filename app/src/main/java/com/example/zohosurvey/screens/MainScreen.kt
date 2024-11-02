@@ -193,7 +193,8 @@ fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostContro
                     scope.launch { openDrawer.close() }
                 })
             } else{
-                DrawerContent(navController,onDepartmentClicked = {
+                DrawerContent(navController,
+                    onDepartmentClicked = {
                     departmentMenu = true
                 },onItemClicked = {
                     scope.launch { openDrawer.close() }

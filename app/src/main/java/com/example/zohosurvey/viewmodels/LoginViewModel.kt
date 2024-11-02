@@ -32,6 +32,7 @@ class LoginViewModel(app: Application, context: Context) : AndroidViewModel(app)
     init {
         viewModelScope.launch {
             list = database.loginDao.getAllDetails()
+            println(list)
         }
     }
 

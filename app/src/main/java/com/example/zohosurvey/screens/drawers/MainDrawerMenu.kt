@@ -28,6 +28,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,9 +54,11 @@ import com.example.zohosurvey.viewmodelfactorys.MainDrawerFactory
 import com.example.zohosurvey.viewmodels.MainDrawerViewModel
 
 @Composable
-fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit) {
+fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit,mainDrawerViewModel: MainDrawerViewModel = viewModel(factory = MainDrawerFactory(
+    LocalContext.current))) {
 
     val widthDp = 400.dp
+    val emailState by mainDrawerViewModel.email.observeAsState()
 
     Column(modifier = Modifier
         .width(widthDp)
@@ -88,7 +93,7 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
                 Spacer(modifier = Modifier.padding(2.dp))
                 Text(
                     color = Color.White,
-                    text = "saranchakkaravarthy@gmail.com",
+                    text = emailState.toString(),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 18.sp
