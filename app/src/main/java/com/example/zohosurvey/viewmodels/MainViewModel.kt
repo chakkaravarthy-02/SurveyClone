@@ -32,5 +32,5 @@ class MainViewModel(context: Context): ViewModel() {
         }
     }
 
-    val list: List<String> = listOf()
+    val list: List<String> = listOf("test")
 }

@@ -8,10 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.zohosurvey.screens.AddingScreen
+import com.example.zohosurvey.screens.DetailScreen
 import com.example.zohosurvey.screens.EntireMainScreen
 import com.example.zohosurvey.screens.SearchScreen
 import com.example.zohosurvey.screens.login.AboutScreen
@@ -67,6 +64,7 @@ fun MyApp(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewMode
             composable("AboutScreen") { AboutScreen(navController) }
             composable("LoginScreen") { LoginScreen(navController, mainViewModel = mainViewModel) }
             composable("SignUpScreen") { SignupScreen(navController) }
+            composable("DetailScreen") { DetailScreen(navController = navController) }
         }
     }else{
         NavHost(navController = navController, startDestination = "AboutScreen") {

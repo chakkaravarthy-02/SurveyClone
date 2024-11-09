@@ -23,6 +23,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.sharp.Settings
 import androidx.compose.material.icons.sharp.Share
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -233,14 +239,16 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
 fun DrawerBalanceIntContent(navController: NavHostController,vectorInt: Int, content: String, onItemClicked: () -> Unit,mainDrawerViewModel: MainDrawerViewModel = viewModel( factory = MainDrawerFactory(
     LocalContext.current)
 )) {
+    var showDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     Row(
         modifier = Modifier
             .clickable {
                 onItemClicked()
                 when (content) {
                     "Log Out" -> {
-                        navController.navigate("AboutScreen")
-                        mainDrawerViewModel.logout()
+                        showDialog = true
                     }
 
                     "Help" -> {}
@@ -264,6 +272,15 @@ fun DrawerBalanceIntContent(navController: NavHostController,vectorInt: Int, con
             text = content,
             fontWeight = FontWeight.SemiBold
         )
+    }
+    if(showDialog){
+        DialogBoxForLogout(onDismiss = {
+            showDialog = false
+        }, onConfirm = {
+            showDialog = false
+            navController.navigate("AboutScreen")
+            mainDrawerViewModel.logout()
+        })
     }
 }
 
@@ -297,6 +314,39 @@ fun DrawerBalanceContent(iconVector: ImageVector, content: String, onItemClicked
             fontWeight = FontWeight.SemiBold
         )
     }
+}
+
+@Composable
+private fun DialogBoxForLogout(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        titleContentColor = Color.Black,
+        textContentColor = Color.Gray,
+        containerColor = Color.White,
+        tonalElevation = 5.dp,
+        title = {
+            Text(text = "Zoho Survey")
+        },
+        text = {
+            Text(text = "Are you sure you want to logout")
+        },
+        shape = RoundedCornerShape(5.dp),
+        onDismissRequest = {
+            onDismiss()
+        }, confirmButton = {
+            Button(colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color(0xFFFE5B54)
+            ), onClick = { onConfirm() }) {
+                Text(text = "Yes")
+            }
+        }, dismissButton = {
+            Button(colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.Black
+            ), onClick = { onDismiss() }) {
+                Text(text = "No")
+            }
+        })
 }
 
 @Preview

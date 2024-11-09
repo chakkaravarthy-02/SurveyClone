@@ -6,8 +6,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +28,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,10 +54,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -153,14 +161,21 @@ fun FilterDialog(onClick: () -> Unit, viewModel: MainViewModel = viewModel()) {
 }
 
 @Composable
-fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostController,viewModel: MainViewModel = viewModel(factory = MainFactory(
-    LocalContext.current))) {
+fun EntireMainScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: MainViewModel = viewModel(
+        factory = MainFactory(
+            LocalContext.current
+        )
+    )
+) {
     val context = LocalContext.current
     val isConnected = rememberSaveable {
         mutableStateOf(checkInternetConnection(context))
     }
 
-    DisposableEffect(context){
+    DisposableEffect(context) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(p0: Context?, p1: Intent?) {
                 isConnected.value = checkInternetConnection(p0!!)
@@ -168,7 +183,7 @@ fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostContro
         }
 
         val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        context.registerReceiver(receiver,filter)
+        context.registerReceiver(receiver, filter)
 
         onDispose {
             context.unregisterReceiver(receiver)
@@ -186,19 +201,19 @@ fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostContro
     ModalNavigationDrawer(
         drawerState = openDrawer,
         drawerContent = {
-            if(departmentMenu){
+            if (departmentMenu) {
                 DepartmentDrawerContent(onDepartmentClicked = {
                     departmentMenu = false
-                },onItemClicked = {
+                }, onItemClicked = {
                     scope.launch { openDrawer.close() }
                 })
-            } else{
+            } else {
                 DrawerContent(navController,
                     onDepartmentClicked = {
-                    departmentMenu = true
-                },onItemClicked = {
-                    scope.launch { openDrawer.close() }
-                })
+                        departmentMenu = true
+                    }, onItemClicked = {
+                        scope.launch { openDrawer.close() }
+                    })
             }
         },
         modifier = Modifier
@@ -214,7 +229,7 @@ fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostContro
                     .fillMaxSize()
                     .background(Color.White)
             ) {
-                if(isConnected.value) {
+                if (isConnected.value) {
                     if (viewModel.list.isEmpty()) {
                         Column(modifier = Modifier.align(Alignment.Center)) {
                             Image(
@@ -228,7 +243,11 @@ fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostContro
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(viewModel.list) {
-                                Text("list: $it")
+                                var length = it.length
+                                while (length>0) {
+                                    ListRow(navController = navController)
+                                    length--
+                                }
                             }
                         }
                     }
@@ -243,7 +262,7 @@ fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostContro
                         Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
                     }
                 } else {
-                    Column(modifier = Modifier.align(Alignment.Center)){
+                    Column(modifier = Modifier.align(Alignment.Center)) {
                         Image(
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
@@ -254,7 +273,8 @@ fun EntireMainScreen(modifier: Modifier = Modifier, navController: NavHostContro
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(color = Color.Gray, text = "No internet")
                     }
-                    Toast.makeText(context,"Check your internet connectivity",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Check your internet connectivity", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
@@ -280,7 +300,73 @@ fun HorizontalLine() {
     )
 }
 
-@Preview(name = "Preview",showBackground = true)
+@Composable
+fun ListRow(modifier: Modifier = Modifier, navController: NavHostController) {
+    var showCount by rememberSaveable {
+        mutableStateOf(false)
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(16.dp)
+            .clickable {
+                navController.navigate("DetailScreen")
+            }
+    ) {
+        Column {
+            Text(text = "Survey name")
+            Spacer(modifier = Modifier.padding(6.dp))
+            Row {
+                Text(fontSize = 11.sp, color = Color.LightGray, text = "Last modified on: ")
+                Text(fontSize = 11.sp, color = Color.LightGray,text = "oct 13,2024")
+                Text(fontSize = 11.sp, text = " 13:37:45",color = Color.LightGray)
+            }
+            Spacer(modifier = Modifier.padding(2.dp))
+            if(showCount){
+                Row {
+                    Text(fontSize = 11.sp, color = Color.LightGray, text = "Latest response on: ")
+                    Text(fontSize = 11.sp, text = "oct 13,2024", color = Color.LightGray)
+                    Text(fontSize = 11.sp, text = " 13:37:45", color = Color.LightGray)
+                }
+            }
+        }
+        if(showCount){
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    color = Color(0xFFFE5B54),
+                    textAlign = TextAlign.Center,
+                    fontSize = 40.sp,
+                    text = "3"
+                )
+                Text(text = "Responses")
+            }
+        }
+        if(!showCount){
+            Button(colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color(0xFF64B1B0)
+            ),
+                shape = RectangleShape,
+                border = BorderStroke(1.dp, Color(0xFF64B1B0)),
+                onClick = {
+                    showCount = true
+                }) {
+                Text(text = "Publish")
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ListPreview() {
+    ListRow(navController = rememberNavController())
+}
+
+@Preview(name = "Preview", showBackground = true)
 @Composable
 private fun EntirePreview() {
     EntireMainScreen(navController = rememberNavController())
