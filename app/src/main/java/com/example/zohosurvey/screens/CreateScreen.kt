@@ -1,5 +1,6 @@
 package com.example.zohosurvey.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,11 +48,12 @@ import androidx.navigation.compose.rememberNavController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddingScreen(navController: NavHostController) {
+    val context = LocalContext.current
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }
     var category by rememberSaveable {
-        mutableStateOf("Select a category")
+        mutableStateOf("")
     }
     var surveyName by rememberSaveable {
         mutableStateOf("")
@@ -138,7 +141,7 @@ fun AddingScreen(navController: NavHostController) {
                         onClick = {
                             expanded = true
                         }) {
-                        Text(text = category)
+                        Text(text = if(category.isEmpty()) "Select a category" else category)
                     }
                     DropdownMenu(modifier = Modifier.background(Color(0xFFFE5B54)),
                         expanded = expanded,
@@ -163,7 +166,17 @@ fun AddingScreen(navController: NavHostController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        onClick = {},
+                        onClick = {
+                            if(surveyName.isNotEmpty()) {
+                                if(category.isNotEmpty()) {
+                                    navController.navigate("CreatePagesScreen/$surveyName")
+                                }else{
+                                    Toast.makeText(context,"Please select the category",Toast.LENGTH_SHORT).show()
+                                }
+                            }else{
+                                Toast.makeText(context,"Please fill the survey name",Toast.LENGTH_SHORT).show()
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFFE5B54), contentColor = Color.White
                         )

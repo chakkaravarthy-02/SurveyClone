@@ -12,12 +12,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.zohosurvey.screens.AddingScreen
+import com.example.zohosurvey.screens.ChoosingScreen
 import com.example.zohosurvey.screens.DetailScreen
 import com.example.zohosurvey.screens.EntireMainScreen
+import com.example.zohosurvey.screens.PagesScreen
 import com.example.zohosurvey.screens.SearchScreen
 import com.example.zohosurvey.screens.login.AboutScreen
 import com.example.zohosurvey.screens.login.LoginScreen
@@ -39,8 +43,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel(factory = MainFactory(
-    LocalContext.current))) {
+fun MyApp(
+    modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel(
+        factory = MainFactory(
+            LocalContext.current
+        )
+    )
+) {
 
     val systemUiController = rememberSystemUiController()
     SideEffect {
@@ -56,30 +65,28 @@ fun MyApp(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewMode
 
     mainViewModel.checkUserLoggedIn()
 
-    if(mainViewModel.isLogin.value) {
-        NavHost(navController = navController, startDestination = "MainScreen") {
-            composable("MainScreen") { EntireMainScreen(navController = navController) }
-            composable("AddingScreen") { AddingScreen(navController) }
-            composable("SearchScreen") { SearchScreen(navController) }
-            composable("AboutScreen") { AboutScreen(navController) }
-            composable("LoginScreen") { LoginScreen(navController, mainViewModel = mainViewModel) }
-            composable("SignUpScreen") { SignupScreen(navController) }
-            composable("DetailScreen") { DetailScreen(navController = navController) }
-        }
-    }else{
-        NavHost(navController = navController, startDestination = "AboutScreen") {
-            composable("AboutScreen") { AboutScreen(navController) }
-            composable("LoginScreen") { LoginScreen(navController, mainViewModel = mainViewModel) }
-            composable("SignUpScreen") { SignupScreen(navController) }
-            composable("MainScreen") { EntireMainScreen(navController = navController) }
-            composable("AddingScreen") { AddingScreen(navController) }
-            composable("SearchScreen") { SearchScreen(navController) }
+    NavHost(
+        navController = navController,
+        startDestination = if (mainViewModel.isLogin.value) "ChoosingScreen" else "AboutScreen"
+    ) {
+        composable("MainScreen") { EntireMainScreen(navController = navController) }
+        composable("AddingScreen") { AddingScreen(navController) }
+        composable("ChoosingScreen") { ChoosingScreen(navController = navController) }
+        composable("SearchScreen") { SearchScreen(navController) }
+        composable("AboutScreen") { AboutScreen(navController) }
+        composable("LoginScreen") { LoginScreen(navController, mainViewModel = mainViewModel) }
+        composable("SignUpScreen") { SignupScreen(navController) }
+        composable("DetailScreen") { DetailScreen(navController = navController) }
+        composable("CreatePagesScreen/{Survey Title}", arguments = listOf(navArgument("Survey Title"){type = NavType.StringType})) {
+            val title = it.arguments?.getString("Survey Title") ?: "None"
+            PagesScreen(navController = navController, title = title)
         }
     }
 }
 
 fun checkInternetConnection(context: Context): Boolean {
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val network = connectivityManager.activeNetwork ?: return false
     val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
     return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||

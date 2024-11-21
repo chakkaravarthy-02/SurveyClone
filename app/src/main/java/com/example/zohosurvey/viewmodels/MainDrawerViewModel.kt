@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModel
 import com.example.zohosurvey.database.DatabaseLogin
 import com.example.zohosurvey.database.getLoginDatabase
 import com.example.zohosurvey.util.SharedPreferencesManager
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,6 +30,29 @@ class MainDrawerViewModel(context: Context): ViewModel() {
 
     private val _userList = MutableLiveData<List<DatabaseLogin>?>()
     val userList: LiveData<List<DatabaseLogin>?> get() = _userList
+
+    private val db = Firebase.firestore
+
+    var count = 0
+    var published = 0
+    var draft = 0
+
+    init {
+        db.collection("users")
+            .document(sharedPreferences.getUser().toString())
+            .collection("files")
+            .get()
+            .addOnSuccessListener {
+                for (document in it){
+                    count++
+                    if(document.getBoolean("isPublished") == true){
+                        published++
+                    }else{
+                        draft++
+                    }
+                }
+            }
+    }
 
     init {
         fetchUserDetails() // Fetch user details when ViewModel is initialized

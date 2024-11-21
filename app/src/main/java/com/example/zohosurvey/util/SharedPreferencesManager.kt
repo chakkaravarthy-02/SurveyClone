@@ -21,6 +21,10 @@ class SharedPreferencesManager(val context: Context) {
         return Pair(userName,lastLogin)
     }
 
+    fun getUser(): String?{
+        return sharedPreferences.getString("username",null)
+    }
+
     fun clearData(){
         sharedPreferences.edit().clear().apply()
     }

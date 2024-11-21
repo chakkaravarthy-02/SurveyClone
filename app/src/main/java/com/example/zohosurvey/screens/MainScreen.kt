@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -45,11 +47,14 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,9 +75,9 @@ import com.example.zohosurvey.checkInternetConnection
 import com.example.zohosurvey.screens.drawers.DepartmentDrawerContent
 import com.example.zohosurvey.screens.drawers.DrawerContent
 import com.example.zohosurvey.viewmodelfactorys.MainFactory
+import com.example.zohosurvey.viewmodels.GetSurvey
 import com.example.zohosurvey.viewmodels.MainViewModel
 import kotlinx.coroutines.launch
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,7 +115,8 @@ fun TopBarWithMenuDrawer(navController: NavHostController, onClick: () -> Unit) 
                 }) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                 }
-            })
+            }
+        )
         if (showDialog) {
             FilterDialog(onClick = {
                 showDialog = false
@@ -189,6 +195,7 @@ fun EntireMainScreen(
             context.unregisterReceiver(receiver)
         }
     }
+    val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val openDrawer = rememberDrawerState(
         initialValue = DrawerValue.Closed
@@ -242,12 +249,9 @@ fun EntireMainScreen(
                         }
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
+                            viewModel.list = viewModel.list.sortedBy { it.createdAt }.toMutableList()
                             items(viewModel.list) {
-                                var length = it.length
-                                while (length>0) {
-                                    ListRow(navController = navController)
-                                    length--
-                                }
+                                ListRow(getSurvey = it,navController = navController)
                             }
                         }
                     }
@@ -282,6 +286,24 @@ fun EntireMainScreen(
 }
 
 @Composable
+fun LazyListState.isScrollingUp(): State<Boolean> {
+    return produceState(initialValue = true) {
+        var lastIndex = 0
+        var lastScroll = Int.MAX_VALUE
+        snapshotFlow {
+            firstVisibleItemIndex to firstVisibleItemScrollOffset
+        }.collect { (currentIndex, currentScroll) ->
+            if (currentIndex != lastIndex || currentScroll != lastScroll) {
+                value = currentIndex < lastIndex ||
+                        (currentIndex == lastIndex && currentScroll < lastScroll)
+                lastIndex = currentIndex
+                lastScroll = currentScroll
+            }
+        }
+    }
+}
+
+@Composable
 fun VerticalLine(value: Int) {
     Divider(
         color = Color.LightGray,
@@ -301,7 +323,7 @@ fun HorizontalLine() {
 }
 
 @Composable
-fun ListRow(modifier: Modifier = Modifier, navController: NavHostController) {
+fun ListRow(getSurvey: GetSurvey, modifier: Modifier = Modifier, navController: NavHostController) {
     var showCount by rememberSaveable {
         mutableStateOf(false)
     }
@@ -317,15 +339,15 @@ fun ListRow(modifier: Modifier = Modifier, navController: NavHostController) {
             }
     ) {
         Column {
-            Text(text = "Survey name")
+            Text(text = getSurvey.title.toString())
             Spacer(modifier = Modifier.padding(6.dp))
             Row {
                 Text(fontSize = 11.sp, color = Color.LightGray, text = "Last modified on: ")
-                Text(fontSize = 11.sp, color = Color.LightGray,text = "oct 13,2024")
-                Text(fontSize = 11.sp, text = " 13:37:45",color = Color.LightGray)
+                Text(fontSize = 11.sp, color = Color.LightGray, text = getSurvey.modified.toString())
+                Text(fontSize = 11.sp, text = " 13:37:45", color = Color.LightGray)
             }
             Spacer(modifier = Modifier.padding(2.dp))
-            if(showCount){
+            if (getSurvey.isPublished==true) {
                 Row {
                     Text(fontSize = 11.sp, color = Color.LightGray, text = "Latest response on: ")
                     Text(fontSize = 11.sp, text = "oct 13,2024", color = Color.LightGray)
@@ -333,7 +355,7 @@ fun ListRow(modifier: Modifier = Modifier, navController: NavHostController) {
                 }
             }
         }
-        if(showCount){
+        if (getSurvey.isPublished == true) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     color = Color(0xFFFE5B54),
@@ -344,7 +366,7 @@ fun ListRow(modifier: Modifier = Modifier, navController: NavHostController) {
                 Text(text = "Responses")
             }
         }
-        if(!showCount){
+        if (getSurvey.isPublished == false) {
             Button(colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
                 contentColor = Color(0xFF64B1B0)
@@ -363,7 +385,7 @@ fun ListRow(modifier: Modifier = Modifier, navController: NavHostController) {
 @Preview
 @Composable
 private fun ListPreview() {
-    ListRow(navController = rememberNavController())
+    ListRow(GetSurvey("", listOf(mapOf("" to "")),"",9,"",false,"","",9,9,"",9,9,9,9,9,9),navController = rememberNavController())
 }
 
 @Preview(name = "Preview", showBackground = true)

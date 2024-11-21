@@ -2,6 +2,8 @@ package com.example.zohosurvey.screens.login
 
 import android.app.Application
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,8 +49,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.zohosurvey.R
 import com.example.zohosurvey.viewmodelfactorys.LoginFactory
+import com.example.zohosurvey.viewmodelfactorys.SignUpFactory
 import com.example.zohosurvey.viewmodels.LoginViewModel
 import com.example.zohosurvey.viewmodels.MainViewModel
+import com.example.zohosurvey.viewmodels.SignUpViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.Scopes
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Scope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
 @Composable
 fun LoginScreen(
@@ -56,9 +67,54 @@ fun LoginScreen(
     mainViewModel: MainViewModel
 ) {
     val context = LocalContext.current
+
     val loginViewModel: LoginViewModel = viewModel(
         factory = LoginFactory(context.applicationContext as Application, context)
     )
+
+    val signUpViewModel: SignUpViewModel = viewModel(
+        factory = SignUpFactory(context.applicationContext as Application)
+    )
+
+    val googleSignInClient = GoogleSignIn.getClient(
+        context,
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .requestProfile()
+            .requestScopes(Scope(Scopes.PLUS_LOGIN))
+            .build()
+    )
+
+    val signInLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try{
+            val account = task.getResult(ApiException::class.java)
+            val email = account?.email
+            val password = account?.email+"#"+account?.displayName
+            val credential = GoogleAuthProvider.getCredential(account?.idToken, null)
+            FirebaseAuth.getInstance().signInWithCredential(credential)
+                .addOnCompleteListener { authTask ->
+                    if(authTask.isSuccessful){
+                        println(password)
+                        if (email != null) {
+                            loginViewModel.savePreference(email)
+                        }
+                        navController.navigate("ChoosingScreen"){
+                            popUpTo("AboutScreen"){inclusive = true}
+                        }
+                        if (email != null ) {
+                            signUpViewModel.insertUserDetails(email = email,password = password, phoneNumber = "no number")
+                        }
+                    } else {
+                        Toast.makeText(context,"Google sign-in failed",Toast.LENGTH_SHORT).show()
+                    }
+                }
+        } catch (e : ApiException){
+            e.printStackTrace()
+            Toast.makeText(context,"Google sign-in failed: ${e.message}",Toast.LENGTH_SHORT).show()
+        }
+    }
     var emailText by rememberSaveable {
         mutableStateOf("")
     }
@@ -164,7 +220,7 @@ fun LoginScreen(
                                 if (loginViewModel.isValidEmail.value == true) {
                                     if (loginViewModel.isValidPassword.value == true) {
                                         loginViewModel.savePreference(emailText)
-                                        navController.navigate("MainScreen"){
+                                        navController.navigate("ChoosingScreen"){
                                             popUpTo("AboutScreen"){inclusive = true}
                                         }
                                     } else {
@@ -201,7 +257,10 @@ fun LoginScreen(
                     ) {
                         IconButton(
                             modifier = Modifier.border(BorderStroke(1.dp, Color.Black)),
-                            onClick = {}) {
+                            onClick = {
+                                val signInIntent = googleSignInClient.signInIntent
+                                signInLauncher.launch(signInIntent)
+                            }) {
                             Image(
                                 painter = painterResource(id = R.drawable.google_signin),
                                 contentDescription = "google-sign-in"

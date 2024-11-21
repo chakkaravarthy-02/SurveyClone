@@ -173,7 +173,7 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
                         Text(
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally),
-                            text = "3",
+                            text = mainDrawerViewModel.count.toString(),
                             fontSize = 53.sp
                         )
                         Text(
@@ -194,7 +194,7 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
                             Text(
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically),
-                                text = "0",
+                                text = mainDrawerViewModel.published.toString(),
                                 style = MaterialTheme.typography.headlineMedium
                             )
                             Text(
@@ -209,7 +209,7 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
                         Row {
                             Text(
                                 modifier = Modifier,
-                                text = "0",
+                                text = mainDrawerViewModel.draft.toString(),
                                 style = MaterialTheme.typography.headlineMedium
                             )
                             Text(
