@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.zohosurvey" />
+                  <option name="mobileSdkAppId" value="1:886685757576:android:a10c23eaddb5d64cd76f3d" />
+                  <option name="projectId" value="surveyz-33c70" />
+                  <option name="projectNumber" value="886685757576" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
