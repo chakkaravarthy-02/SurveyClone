@@ -1,5 +1,6 @@
 package com.example.zohosurvey.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +20,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,32 +30,48 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.zohosurvey.R
+import com.example.zohosurvey.viewmodelfactorys.DetailFactory
+import com.example.zohosurvey.viewmodels.DetailViewModel
+import com.example.zohosurvey.viewmodels.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(modifier: Modifier = Modifier, navController: NavHostController) {
-    var statusText by rememberSaveable {
-        mutableStateOf("Active")
+fun DetailScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    detailViewModel: DetailViewModel = viewModel(
+        factory = DetailFactory(LocalContext.current)
+    ),
+    id: Int
+) {
+
+    val surveyList by detailViewModel.list.collectAsState()
+    println("in detail screen")
+
+    var showCloseDialog by rememberSaveable {
+        mutableStateOf(false)
     }
-    var reopenText by rememberSaveable {
-        mutableStateOf("Close")
-    }
-    var showDialog by rememberSaveable {
+    var showDeleteDialog by rememberSaveable {
         mutableStateOf(false)
     }
     Column(
@@ -63,7 +81,18 @@ fun DetailScreen(modifier: Modifier = Modifier, navController: NavHostController
     ) {
         TopAppBar(
             title = {
-                Text(text = "survey title")
+                Text(text = if (surveyList.isNotEmpty()) surveyList[id].title.toString() else "Loading...")
+            },
+            actions = {
+                IconButton(onClick = {
+                    showDeleteDialog = true
+                }) {
+                    Icon(
+                        tint = Color.White,
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "delete"
+                    )
+                }
             },
             navigationIcon = {
                 IconButton(onClick = {
@@ -75,7 +104,7 @@ fun DetailScreen(modifier: Modifier = Modifier, navController: NavHostController
                 }) {
                     Icon(
                         tint = Color.White,
-                        imageVector = Icons.Filled.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "back"
                     )
                 }
@@ -86,6 +115,21 @@ fun DetailScreen(modifier: Modifier = Modifier, navController: NavHostController
                 actionIconContentColor = Color.White
             )
         )
+        if (showDeleteDialog) {
+            DialogBox(
+                text = "Are you sure you want to delete the survey",
+                onDismiss = {
+                    showDeleteDialog = false
+                }, onConfirm = {
+                    detailViewModel.deleteSurvey(title = surveyList[id].title.toString())
+                    showDeleteDialog = false
+                    navController.navigate("MainScreen") {
+                        popUpTo("MainScreen") {
+                            inclusive = true
+                        }
+                    }
+                })
+        }
         Box(
             modifier = Modifier
                 .padding(bottom = 32.dp)
@@ -103,74 +147,99 @@ fun DetailScreen(modifier: Modifier = Modifier, navController: NavHostController
                         .fillMaxWidth()
                         .background(Color.White)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            modifier = Modifier.align(Alignment.Start),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            text = "Summary"
-                        )
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                    if (surveyList.isNotEmpty()) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(fontSize = 50.sp, text = "2")
-                                Text(fontSize = 15.sp, text = "Total Responses")
-                            }
-                            VerticalLine(value = 110)
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(fontSize = 20.sp, text = "2")
-                                    Spacer(modifier = Modifier.padding(6.dp))
-                                    Text(fontSize = 15.sp, text = "Completed")
+                            Text(
+                                modifier = Modifier.align(Alignment.Start),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                text = "Summary"
+                            )
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        fontSize = 50.sp,
+                                        text = (surveyList[id].response ?: 0).toString()
+                                    )
+                                    Text(fontSize = 15.sp, text = "Total Responses")
                                 }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(fontSize = 20.sp, text = "0")
-                                    Spacer(modifier = Modifier.padding(6.dp))
-                                    Text(fontSize = 15.sp, text = "Partial")
+                                VerticalLine(value = 110)
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(fontSize = 20.sp, text = "2")
+                                        Spacer(modifier = Modifier.padding(6.dp))
+                                        Text(fontSize = 15.sp, text = "Completed")
+                                    }
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(fontSize = 20.sp, text = "0")
+                                        Spacer(modifier = Modifier.padding(6.dp))
+                                        Text(fontSize = 15.sp, text = "Partial")
+                                    }
                                 }
                             }
-                        }
-                        Spacer(modifier = Modifier.padding(8.dp))
-                        Button(
-                            colors = ButtonDefaults.buttonColors(
-                                contentColor = Color.White,
-                                containerColor = Color.Black
-                            ),
-                            modifier = Modifier.size(width = 140.dp, height = 60.dp),
-                            shape = RectangleShape,
-                            onClick = {}
-                        ) {
-                            Text(fontSize = 15.sp, text = "View Report")
-                        }
-                        Spacer(modifier = Modifier.padding(16.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row {
+                            Spacer(modifier = Modifier.padding(8.dp))
+                            Button(
+                                colors = ButtonDefaults.buttonColors(
+                                    contentColor = Color.White,
+                                    containerColor = Color.Black
+                                ),
+                                modifier = Modifier.size(width = 140.dp, height = 60.dp),
+                                shape = RectangleShape,
+                                onClick = {}
+                            ) {
+                                Text(fontSize = 15.sp, text = "View Report")
+                            }
+                            Spacer(modifier = Modifier.padding(16.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 Row {
-                                    Text(fontSize = 12.sp, color = Color.Gray, text = "1")
-                                    Spacer(modifier = Modifier.padding(start = 2.dp))
-                                    Text(fontSize = 12.sp, color = Color.Gray, text = "Page")
+                                    Row {
+                                        Text(
+                                            fontSize = 12.sp,
+                                            color = Color.Gray,
+                                            text = (surveyList[id].pages).toString()
+                                        )
+                                        Spacer(modifier = Modifier.padding(start = 2.dp))
+                                        Text(fontSize = 12.sp, color = Color.Gray, text = "Page")
+                                    }
+                                    Spacer(modifier = Modifier.padding(start = 12.dp))
+                                    Row {
+                                        Text(
+                                            fontSize = 12.sp,
+                                            color = Color.Gray,
+                                            text = surveyList[id].questionData?.size.toString()
+                                        )
+                                        Spacer(modifier = Modifier.padding(start = 2.dp))
+                                        Text(
+                                            fontSize = 12.sp,
+                                            color = Color.Gray,
+                                            text = "Questions"
+                                        )
+                                    }
                                 }
-                                Spacer(modifier = Modifier.padding(start = 12.dp))
                                 Row {
-                                    Text(fontSize = 12.sp, color = Color.Gray, text = "0")
+                                    Text(
+                                        fontSize = 12.sp,
+                                        color = Color.Gray,
+                                        text = (surveyList[id].visits ?: 0).toString()
+                                    )
                                     Spacer(modifier = Modifier.padding(start = 2.dp))
-                                    Text(fontSize = 12.sp, color = Color.Gray, text = "Questions")
+                                    Text(
+                                        fontSize = 12.sp,
+                                        color = Color.Gray,
+                                        text = "Survey Visits"
+                                    )
                                 }
-                            }
-                            Row {
-                                Text(fontSize = 12.sp, color = Color.Gray, text = "2")
-                                Spacer(modifier = Modifier.padding(start = 2.dp))
-                                Text(fontSize = 12.sp, color = Color.Gray, text = "Survey Visits")
                             }
                         }
                     }
@@ -181,112 +250,165 @@ fun DetailScreen(modifier: Modifier = Modifier, navController: NavHostController
                         .fillMaxWidth()
                         .background(Color.White)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            modifier = Modifier.align(Alignment.Start),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            text = "Details"
-                        )
-                        Spacer(modifier = Modifier.padding(8.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(fontSize = 12.sp, text = "Status", color = Color.Gray)
-                            Text(
-                                fontSize = 12.sp,
-                                text = statusText,
-                                color = if (statusText == "Closed") Color.Red else Color(0xFF059B20)
-                            )
-                        }
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(fontSize = 12.sp, text = "Created on", color = Color.Gray)
-                            Text(fontSize = 12.sp, text = "Oct 14, 2024")
-                        }
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(fontSize = 12.sp, text = "Latest response on", color = Color.Gray)
-                            Text(fontSize = 12.sp, text = "Oct 22, 2024")
-                        }
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(fontSize = 12.sp, text = "Last modified on", color = Color.Gray)
-                            Text(fontSize = 12.sp, text = "Oct 23, 2024")
-                        }
-                        Spacer(modifier = Modifier.padding(8.dp))
-                        Text(
-                            modifier = Modifier.align(Alignment.Start),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            text = "Actions"
-                        )
-                        Spacer(modifier = Modifier.padding(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(fontSize = 12.sp, text = "View Survey", color = Color.Gray)
-                            IconButton(onClick = {}) {
-                                Icon(
-                                    imageVector = Icons.Filled.KeyboardArrowRight,
-                                    contentDescription = "go to survey"
+                    if (surveyList.isNotEmpty()) {
+                        if (surveyList[id].isPublished == true) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+                                    .fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    text = "Details"
                                 )
+                                Spacer(modifier = Modifier.padding(8.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(fontSize = 12.sp, text = "Status", color = Color.Gray)
+                                    Text(
+                                        fontSize = 12.sp,
+                                        text = surveyList[id].status.toString(),
+                                        color = if (surveyList[id].status.toString() == "Closed") Color.Red else Color(
+                                            0xFF059B20
+                                        )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.padding(4.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(fontSize = 12.sp, text = "Created on", color = Color.Gray)
+                                    Text(
+                                        fontSize = 12.sp,
+                                        text = surveyList[id].createdTime.toString()
+                                    )
+                                }
+                                Spacer(modifier = Modifier.padding(4.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        fontSize = 12.sp,
+                                        text = "Latest response on",
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        fontSize = 12.sp,
+                                        text = surveyList[id].responseTime.toString()
+                                    )
+                                }
+                                Spacer(modifier = Modifier.padding(4.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        fontSize = 12.sp,
+                                        text = "Last modified on",
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        fontSize = 12.sp,
+                                        text = surveyList[id].modifiedTime.toString()
+                                    )
+                                }
+                                Spacer(modifier = Modifier.padding(8.dp))
+                                Text(
+                                    modifier = Modifier.align(Alignment.Start),
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    text = "Actions"
+                                )
+                                Spacer(modifier = Modifier.padding(2.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(fontSize = 12.sp, text = "View Survey", color = Color.Gray)
+                                    IconButton(onClick = {}) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                            contentDescription = "go to survey"
+                                        )
+                                    }
+                                }
+                                Text(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterHorizontally)
+                                        .padding(bottom = 10.dp)
+                                        .clickable {
+                                            if (surveyList[id].status.toString() == "Closed") {
+                                                detailViewModel.changeStatus(
+                                                    surveyList[id].title.toString(),
+                                                    "Active"
+                                                )
+                                            } else {
+                                                showCloseDialog = true
+                                            }
+                                        },
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 18.sp,
+                                    color = if (surveyList[id].status.toString() == "Closed") Color(
+                                        0xFF059B20
+                                    ) else Color.Red,
+                                    text = if (surveyList[id].status.toString() == "Closed") "Reopen Survey" else "Close"
+                                )
+
+                                if (showCloseDialog) {
+                                    DialogBox(
+                                        text = "Are you sure you want to close the survey",
+                                        onDismiss = {
+                                            showCloseDialog = false
+                                        }, onConfirm = {
+                                            detailViewModel.changeStatus(
+                                                surveyList[id].title.toString(),
+                                                "Closed"
+                                            )
+                                            showCloseDialog = false
+                                        })
+                                }
+                            }
+                        } else {
+                            Column(
+                                modifier = modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.lanch),
+                                    contentDescription = "publish image"
+                                )
+                                Button(
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = Color.White,
+                                        containerColor = Color(0xFFFE5B54)
+                                    ), onClick = {
+                                        detailViewModel.publishThisSurvey(title = surveyList[id].title.toString())
+                                    }) {
+                                    Text(text = "Publish")
+                                }
                             }
                         }
-                        Text(
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(bottom = 10.dp)
-                                .clickable {
-                                    if (reopenText == "Reopen Survey") {
-                                        reopenText = "Close"
-                                        statusText = "Active"
-                                    } else {
-                                        showDialog = true
-                                    }
-                                },
-                            textAlign = TextAlign.Center,
-                            fontSize = 18.sp,
-                            color = if (reopenText == "Close") Color.Red else Color(0xFF059B20),
-                            text = reopenText
-                        )
-
-                        if (showDialog) {
-                            DialogBoxForClose(onDismiss = {
-                                showDialog = false
-                            }, onConfirm = {
-                                reopenText = "Reopen Survey"
-                                statusText = "Closed"
-                                showDialog = false
-                            })
-                        }
+                    } else {
+                        Text(modifier = Modifier.align(Alignment.Center), text = "Loading...")
                     }
                 }
             }
@@ -295,7 +417,7 @@ fun DetailScreen(modifier: Modifier = Modifier, navController: NavHostController
 }
 
 @Composable
-private fun DialogBoxForClose(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+private fun DialogBox(text: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         titleContentColor = Color.Black,
         textContentColor = Color.Gray,
@@ -305,7 +427,7 @@ private fun DialogBoxForClose(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             Text(text = "Zoho Survey")
         },
         text = {
-            Text(text = "Are you sure you want to close the survey")
+            Text(text = text)
         },
         shape = RoundedCornerShape(5.dp),
         onDismissRequest = {
@@ -330,13 +452,13 @@ private fun DialogBoxForClose(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 @Preview
 @Composable
 private fun DetailPreview() {
-    DetailScreen(navController = rememberNavController())
+    DetailScreen(navController = rememberNavController(), id = 0)
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
 private fun Dialog() {
-    DialogBoxForClose(onDismiss = {}) {
+    DialogBox("", onDismiss = {}) {
 
     }
 }

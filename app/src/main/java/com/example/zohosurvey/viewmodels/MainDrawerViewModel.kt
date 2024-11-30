@@ -28,9 +28,6 @@ class MainDrawerViewModel(context: Context): ViewModel() {
     private val _email = MutableLiveData<String?>()
     val email: LiveData<String?> get() = _email
 
-    private val _userList = MutableLiveData<List<DatabaseLogin>?>()
-    val userList: LiveData<List<DatabaseLogin>?> get() = _userList
-
     private val db = Firebase.firestore
 
     var count = 0
@@ -61,7 +58,6 @@ class MainDrawerViewModel(context: Context): ViewModel() {
     private fun fetchUserDetails() {
         viewModelScope.launch {
             val userDetails = database.loginDao.getAllDetails()
-            _userList.postValue(userDetails)
             val (emailTemp, _) = sharedPreferences.getUserDetails()
             val user = userDetails?.find { it.email == emailTemp }
             _email.postValue(user?.email) // Update LiveData with the email

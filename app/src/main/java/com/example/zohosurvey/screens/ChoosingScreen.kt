@@ -106,7 +106,9 @@ fun ChoosingScreen(modifier: Modifier = Modifier, navController: NavHostControll
                         defaultElevation = 4.dp
                     ),
                     shape = RoundedCornerShape(10.dp),
-                    onClick = {}
+                    onClick = {
+                        navController.navigate("LinkScreen")
+                    }
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Text(

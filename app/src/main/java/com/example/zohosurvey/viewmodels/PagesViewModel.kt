@@ -1,18 +1,23 @@
 package com.example.zohosurvey.viewmodels
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.zohosurvey.util.SharedPreferencesManager
 import com.example.zohosurvey.util.encode
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class PagesViewModel : ViewModel() {
+class PagesViewModel(context: Context): ViewModel() {
     private var _questions = mutableStateListOf<Question>()
     val questions: List<Question> get() = _questions
+
+    private val preferencesManager = SharedPreferencesManager(context)
+    private val db = FirebaseFirestore.getInstance()
 
     private val currentDateTime = LocalDateTime.now()
     private val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
@@ -48,9 +53,8 @@ class PagesViewModel : ViewModel() {
         _questions.add(Question("", "", "", "", ""))
     }
 
-    fun savePagesForUser(emailId: String, title: String) {
-        val db = FirebaseFirestore.getInstance()
-
+    fun savePagesForUser(title: String) {
+        val emailId = preferencesManager.getUser()
         val questionData = _questions.map { question ->
             mapOf(
                 "questionText" to question.questionText,
@@ -65,14 +69,14 @@ class PagesViewModel : ViewModel() {
 
         val fileData = mapOf(
             "title" to title,
-            "pages" to questionData,
+            "questionData" to questionData,
             "createdTime" to formattedDate,
             "response" to 0,
-            "status" to "active",
+            "status" to "Active",
             "isPublished" to false,
             "modified" to formattedDate,
             "completed" to 0,
-            "pages" to _questions.size,
+            "pages" to questionData.size,
             "responseTime" to formattedDate,
             "answeredToOptionA" to 0,
             "answeredToOptionB" to 0,
@@ -83,17 +87,19 @@ class PagesViewModel : ViewModel() {
             "createdAt" to System.currentTimeMillis()
         )
 
-        db.collection("users")
-            .document(emailId)
-            .collection("files")
-            .document(fileId)
-            .set(fileData)
-            .addOnSuccessListener {
-                println("Pages saved under file $fileId for user $emailId!")
-            }
-            .addOnFailureListener { e ->
-                println("Error saving pages: ${e.message}")
-            }
+        if (emailId != null) {
+            db.collection("users")
+                .document(emailId)
+                .collection("files")
+                .document(fileId)
+                .set(fileData)
+                .addOnSuccessListener {
+                    println("Pages saved under file $fileId for user $emailId!")
+                }
+                .addOnFailureListener { e ->
+                    println("Error saving pages: ${e.message}")
+                }
+        }
     }
 }
 

@@ -9,64 +9,52 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.zohosurvey.util.SharedPreferencesManager
-import com.example.zohosurvey.viewmodelfactorys.PagesFactory
-import com.example.zohosurvey.viewmodels.PagesViewModel
+import androidx.navigation.NavController
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PagesScreen(
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    title: String,
-    pagesViewModel: PagesViewModel = viewModel(
-        factory = PagesFactory(LocalContext.current)
-    )
-) {
-    val item = mutableListOf(1)
-    val context = LocalContext.current
-
-    val questions = pagesViewModel.questions
+fun AnswerScreen(modifier: Modifier = Modifier, navController: NavController) {
 
     val pagerState = rememberPagerState()
 
-    var totalPages by rememberSaveable {
-        mutableIntStateOf(item.size)
+    var isFirstOption by rememberSaveable {
+        mutableStateOf(false)
     }
-
+    var isSecondOption by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var isThirdOption by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var isFourthOption by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Surface(
         modifier = modifier
@@ -86,16 +74,7 @@ fun PagesScreen(
                 actionIconContentColor = Color.White,
                 scrolledContainerColor = Color(0xFFFE5B54)
             ),
-                title = { Text(fontWeight = FontWeight.SemiBold, text = title) },
-                actions = {
-                    IconButton(onClick = {
-                        item.add(item[item.size - 1] + 1)
-                        pagesViewModel.addQuestion()
-                        totalPages = item.size
-                    }) {
-                        Icon(imageVector = Icons.Filled.Add, contentDescription = "add page")
-                    }
-                },
+                title = { Text(fontWeight = FontWeight.SemiBold, text = "Survey") },
                 navigationIcon = {
                     IconButton(onClick = {
                         navController.navigate("AddingScreen")
@@ -107,11 +86,11 @@ fun PagesScreen(
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                 Text(color = Color.Black, text = "Page ")
                 Text(color = Color.Black, text = (pagerState.currentPage + 1).toString())
-                Text(color = Color.Black, text = "/$totalPages")
+                Text(color = Color.Black, text = "/2")
             }
             Spacer(modifier = Modifier.padding(2.dp))
             HorizontalPager(
-                count = item.size,
+                count = 2,
                 state = pagerState,
                 modifier = Modifier.weight(1f)
             ) {
@@ -131,34 +110,31 @@ fun PagesScreen(
                         modifier = Modifier
                             .padding(16.dp),
                     ) {
-                        Text(
-                            text = "Enter the survey question :",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                        TextField(
-                            value = questions[currentPage].questionText,
-                            onValueChange = { new ->
-                                pagesViewModel.setQuestionForPage(currentPage, new)
-                            })
-                        Text(
-                            text = "Enter the options:",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                        TextField(value = questions[currentPage].optionA, onValueChange = { new ->
-                            pagesViewModel.setOption1(currentPage, new)
+                        Text(text = "Question")
+                        Text(text = "Choose your option")
+                        RadioButton(selected = isFirstOption, onClick = {
+                            isFirstOption = !isFirstOption
+                            isSecondOption = false
+                            isThirdOption = false
+                            isFourthOption = false
                         })
-                        TextField(value = questions[currentPage].optionB, onValueChange = { new ->
-                            pagesViewModel.setOption2(currentPage, new)
+                        RadioButton(selected = isSecondOption, onClick = {
+                            isSecondOption = !isSecondOption
+                            isFirstOption = false
+                            isThirdOption = false
+                            isFourthOption = false
                         })
-                        TextField(value = questions[currentPage].optionC, onValueChange = { new ->
-                            pagesViewModel.setOption3(currentPage, new)
+                        RadioButton(selected = isThirdOption, onClick = {
+                            isFirstOption = false
+                            isSecondOption = false
+                            isFourthOption = false
+                            isThirdOption = !isThirdOption
                         })
-                        TextField(value = questions[currentPage].optionD, onValueChange = { new ->
-                            pagesViewModel.setOption4(currentPage, new)
+                        RadioButton(selected = isFourthOption, onClick = {
+                            isFourthOption = !isFourthOption
+                            isFirstOption = false
+                            isSecondOption = false
+                            isThirdOption = false
                         })
                     }
                 }
@@ -176,21 +152,14 @@ fun PagesScreen(
                     .fillMaxWidth()
                     .padding(16.dp),
                 onClick = {
-                    pagesViewModel.savePagesForUser(title)
-                    navController.navigate("MainScreen"){
-                        popUpTo("MainScreen"){
+                    navController.navigate("LinkScreen") {
+                        popUpTo("LinkScreen") {
                             inclusive = true
                         }
                     }
                 }) {
-                Text(text = "Save and continue")
+                Text(text = "Submit")
             }
         }
     }
-}
-
-@Preview
-@Composable
-private fun PagesPreview() {
-    PagesScreen(navController = rememberNavController(), title = "")
 }

@@ -8,3 +8,33 @@ fun String.encode(): String{
     }
     return encoded
 }
+
+fun String.decode(): String{
+    val str = this
+    var decoded = ""
+    for(i in str.indices){
+        decoded+=str[i]-1
+    }
+    return decoded
+}
+
+
+data class GetSurvey(
+    var title: String?,
+    var questionData: List<Map<String, String>>?,
+    var createdTime: String?,
+    var response: Int?,
+    var status: String?,
+    var isPublished: Boolean?,
+    var modified: String?,
+    var modifiedTime: String?,
+    var completed: Int?,
+    var pages: Long?,
+    var responseTime: String?,
+    var answeredToOptionA: Int?,
+    var answeredToOptionB: Int?,
+    var answeredToOptionC: Int?,
+    var answeredToOptionD: Int?,
+    var visits: Int?,
+    var createdAt: Long?
+)

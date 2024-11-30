@@ -22,8 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -47,14 +46,12 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,8 +71,8 @@ import com.example.zohosurvey.R
 import com.example.zohosurvey.checkInternetConnection
 import com.example.zohosurvey.screens.drawers.DepartmentDrawerContent
 import com.example.zohosurvey.screens.drawers.DrawerContent
+import com.example.zohosurvey.util.GetSurvey
 import com.example.zohosurvey.viewmodelfactorys.MainFactory
-import com.example.zohosurvey.viewmodels.GetSurvey
 import com.example.zohosurvey.viewmodels.MainViewModel
 import kotlinx.coroutines.launch
 
@@ -176,6 +173,8 @@ fun EntireMainScreen(
         )
     )
 ) {
+    val surveyList by viewModel.list.collectAsState()
+    println(surveyList+"^")
     val context = LocalContext.current
     val isConnected = rememberSaveable {
         mutableStateOf(checkInternetConnection(context))
@@ -237,7 +236,7 @@ fun EntireMainScreen(
                     .background(Color.White)
             ) {
                 if (isConnected.value) {
-                    if (viewModel.list.isEmpty()) {
+                    if (surveyList.isEmpty()) {
                         Column(modifier = Modifier.align(Alignment.Center)) {
                             Image(
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -249,9 +248,9 @@ fun EntireMainScreen(
                         }
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            viewModel.list = viewModel.list.sortedBy { it.createdAt }.toMutableList()
-                            items(viewModel.list) {
-                                ListRow(getSurvey = it,navController = navController)
+                            val list = surveyList
+                            itemsIndexed(list) {index,item ->
+                                ListRow(list = list,viewModel = viewModel,index = index,getSurvey = item,navController = navController)
                             }
                         }
                     }
@@ -286,18 +285,65 @@ fun EntireMainScreen(
 }
 
 @Composable
-fun LazyListState.isScrollingUp(): State<Boolean> {
-    return produceState(initialValue = true) {
-        var lastIndex = 0
-        var lastScroll = Int.MAX_VALUE
-        snapshotFlow {
-            firstVisibleItemIndex to firstVisibleItemScrollOffset
-        }.collect { (currentIndex, currentScroll) ->
-            if (currentIndex != lastIndex || currentScroll != lastScroll) {
-                value = currentIndex < lastIndex ||
-                        (currentIndex == lastIndex && currentScroll < lastScroll)
-                lastIndex = currentIndex
-                lastScroll = currentScroll
+fun ListRow(
+    getSurvey: GetSurvey,
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    index: Int,
+    viewModel: MainViewModel,
+    list: List<GetSurvey>
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(16.dp)
+            .clickable {
+                navController.navigate("DetailScreen/$index")
+            }
+    ) {
+        Column {
+            println("index - $index and ${list[index].pages}")
+            Text(text = list[index].title.toString())
+            Spacer(modifier = Modifier.padding(6.dp))
+            Row {
+                Text(fontSize = 11.sp, color = Color.LightGray, text = "Last modified on: ")
+                Text(fontSize = 11.sp, color = Color.LightGray, text = getSurvey.modified.toString())
+                Text(fontSize = 11.sp, text = getSurvey.modifiedTime.toString(), color = Color.LightGray)
+            }
+            Spacer(modifier = Modifier.padding(2.dp))
+            if (list[index].isPublished==true) {
+                Row {
+                    Text(fontSize = 11.sp, color = Color.LightGray, text = "Latest response on: ")
+                    Text(fontSize = 11.sp, text = "oct 13,2024", color = Color.LightGray)
+                    Text(fontSize = 11.sp, text = " 13:37:45", color = Color.LightGray)
+                }
+            }
+        }
+        if (list[index].isPublished == true) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    color = Color(0xFFFE5B54),
+                    textAlign = TextAlign.Center,
+                    fontSize = 40.sp,
+                    text = (list[index].response ?: 0).toString()
+                )
+                Text(text = "Responses")
+            }
+        }
+        if (list[index].isPublished == false) {
+            Button(colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color(0xFF64B1B0)
+            ),
+                shape = RectangleShape,
+                border = BorderStroke(1.dp, Color(0xFF64B1B0)),
+                onClick = {
+                    navController.navigate("DetailScreen/$index")
+                }) {
+                Text(text = "Publish")
             }
         }
     }
@@ -322,70 +368,16 @@ fun HorizontalLine() {
     )
 }
 
-@Composable
-fun ListRow(getSurvey: GetSurvey, modifier: Modifier = Modifier, navController: NavHostController) {
-    var showCount by rememberSaveable {
-        mutableStateOf(false)
-    }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(16.dp)
-            .clickable {
-                navController.navigate("DetailScreen")
-            }
-    ) {
-        Column {
-            Text(text = getSurvey.title.toString())
-            Spacer(modifier = Modifier.padding(6.dp))
-            Row {
-                Text(fontSize = 11.sp, color = Color.LightGray, text = "Last modified on: ")
-                Text(fontSize = 11.sp, color = Color.LightGray, text = getSurvey.modified.toString())
-                Text(fontSize = 11.sp, text = " 13:37:45", color = Color.LightGray)
-            }
-            Spacer(modifier = Modifier.padding(2.dp))
-            if (getSurvey.isPublished==true) {
-                Row {
-                    Text(fontSize = 11.sp, color = Color.LightGray, text = "Latest response on: ")
-                    Text(fontSize = 11.sp, text = "oct 13,2024", color = Color.LightGray)
-                    Text(fontSize = 11.sp, text = " 13:37:45", color = Color.LightGray)
-                }
-            }
-        }
-        if (getSurvey.isPublished == true) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    color = Color(0xFFFE5B54),
-                    textAlign = TextAlign.Center,
-                    fontSize = 40.sp,
-                    text = "3"
-                )
-                Text(text = "Responses")
-            }
-        }
-        if (getSurvey.isPublished == false) {
-            Button(colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
-                contentColor = Color(0xFF64B1B0)
-            ),
-                shape = RectangleShape,
-                border = BorderStroke(1.dp, Color(0xFF64B1B0)),
-                onClick = {
-                    showCount = true
-                }) {
-                Text(text = "Publish")
-            }
-        }
-    }
-}
-
 @Preview
 @Composable
 private fun ListPreview() {
-    ListRow(GetSurvey("", listOf(mapOf("" to "")),"",9,"",false,"","",9,9,"",9,9,9,9,9,9),navController = rememberNavController())
+    ListRow(
+        GetSurvey("", listOf(mapOf("" to "")),"",9,"",false,"","",9,9,"",9,9,9,9,9,9),
+        navController = rememberNavController(),
+        index = 0,
+        viewModel = viewModel(),
+        list = listOf()
+    )
 }
 
 @Preview(name = "Preview", showBackground = true)

@@ -18,9 +18,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.zohosurvey.screens.AddingScreen
+import com.example.zohosurvey.screens.AnswerScreen
 import com.example.zohosurvey.screens.ChoosingScreen
 import com.example.zohosurvey.screens.DetailScreen
 import com.example.zohosurvey.screens.EntireMainScreen
+import com.example.zohosurvey.screens.LinkScreen
 import com.example.zohosurvey.screens.PagesScreen
 import com.example.zohosurvey.screens.SearchScreen
 import com.example.zohosurvey.screens.login.AboutScreen
@@ -70,14 +72,25 @@ fun MyApp(
         startDestination = if (mainViewModel.isLogin.value) "ChoosingScreen" else "AboutScreen"
     ) {
         composable("MainScreen") { EntireMainScreen(navController = navController) }
+        composable("LinkScreen") {LinkScreen(navController = navController)}
+        composable("AnswerScreen") {AnswerScreen(navController = navController)}
         composable("AddingScreen") { AddingScreen(navController) }
         composable("ChoosingScreen") { ChoosingScreen(navController = navController) }
         composable("SearchScreen") { SearchScreen(navController) }
         composable("AboutScreen") { AboutScreen(navController) }
         composable("LoginScreen") { LoginScreen(navController, mainViewModel = mainViewModel) }
         composable("SignUpScreen") { SignupScreen(navController) }
-        composable("DetailScreen") { DetailScreen(navController = navController) }
-        composable("CreatePagesScreen/{Survey Title}", arguments = listOf(navArgument("Survey Title"){type = NavType.StringType})) {
+        composable(
+            "DetailScreen/{id}",
+            arguments = listOf(navArgument("id") {type = NavType.IntType})
+        ) {
+            val id = it.arguments?.getInt("id") ?: 0
+            DetailScreen(navController = navController, id = id)
+        }
+        composable(
+            "CreatePagesScreen/{Survey Title}",
+            arguments = listOf(navArgument("Survey Title") { type = NavType.StringType })
+        ) {
             val title = it.arguments?.getString("Survey Title") ?: "None"
             PagesScreen(navController = navController, title = title)
         }
