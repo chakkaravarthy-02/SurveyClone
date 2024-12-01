@@ -43,7 +43,9 @@ fun ChoosingScreen(modifier: Modifier = Modifier, navController: NavHostControll
                 titleContentColor = Color.White,
                 actionIconContentColor = Color.White,
                 scrolledContainerColor = Color(0xFFFE5B54)
-            ), title = {}, navigationIcon = {
+            ),
+            title = {},
+            navigationIcon = {
                 Image(
                     modifier = Modifier
                         .padding(start = 16.dp, top = 12.dp, bottom = 12.dp)

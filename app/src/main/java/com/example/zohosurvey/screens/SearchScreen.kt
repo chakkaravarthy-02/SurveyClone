@@ -99,7 +99,8 @@ fun SearchScreen(navController: NavHostController, modifier: Modifier = Modifier
         )
         Box (modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)){
+            .background(Color.White)
+        ){
             //TODO("get data from database")
         }
     }

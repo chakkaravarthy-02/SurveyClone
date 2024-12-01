@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import com.example.zohosurvey.util.SharedPreferencesManager
 import com.example.zohosurvey.util.encode
 import com.google.firebase.firestore.FirebaseFirestore
+import java.net.URLEncoder
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -67,6 +68,8 @@ class PagesViewModel(context: Context): ViewModel() {
 
         val fileId = title.encode()
 
+        val link = generateLink(fileId)
+
         val fileData = mapOf(
             "title" to title,
             "questionData" to questionData,
@@ -84,7 +87,8 @@ class PagesViewModel(context: Context): ViewModel() {
             "answeredToOptionD" to 0,
             "visits" to 0,
             "modifiedTime" to formattedTime,
-            "createdAt" to System.currentTimeMillis()
+            "createdAt" to System.currentTimeMillis(),
+            "link" to link
         )
 
         if (emailId != null) {
@@ -100,6 +104,14 @@ class PagesViewModel(context: Context): ViewModel() {
                     println("Error saving pages: ${e.message}")
                 }
         }
+    }
+
+    private fun generateLink(fileId: String): String? {
+        var encoded = fileId.encode()
+        encoded = URLEncoder.encode(encoded,"UTF-8")
+        val currentTime = System.currentTimeMillis().toString()
+        val deepLink = "https://surveyz.com/$encoded-$currentTime"
+        return deepLink
     }
 }
 

@@ -36,5 +36,6 @@ data class GetSurvey(
     var answeredToOptionC: Int?,
     var answeredToOptionD: Int?,
     var visits: Int?,
-    var createdAt: Long?
+    var createdAt: Long?,
+    var link: String?
 )

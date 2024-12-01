@@ -23,12 +23,16 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:theme="@style/Theme.ZohoSurvey">
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.MAIN" />
-
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <data
+                    android:scheme="https"
+                    android:host="surveyz.com"
+                    android:pathPattern="/.*" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

@@ -372,7 +372,7 @@ fun HorizontalLine() {
 @Composable
 private fun ListPreview() {
     ListRow(
-        GetSurvey("", listOf(mapOf("" to "")),"",9,"",false,"","",9,9,"",9,9,9,9,9,9),
+        GetSurvey("", listOf(mapOf("" to "")),"",9,"",false,"","",9,9,"",9,9,9,9,9,9,""),
         navController = rememberNavController(),
         index = 0,
         viewModel = viewModel(),

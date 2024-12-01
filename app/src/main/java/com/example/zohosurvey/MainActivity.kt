@@ -20,6 +20,7 @@ import androidx.navigation.navArgument
 import com.example.zohosurvey.screens.AddingScreen
 import com.example.zohosurvey.screens.AnswerScreen
 import com.example.zohosurvey.screens.ChoosingScreen
+import com.example.zohosurvey.screens.CreatedLinkScreen
 import com.example.zohosurvey.screens.DetailScreen
 import com.example.zohosurvey.screens.EntireMainScreen
 import com.example.zohosurvey.screens.LinkScreen
@@ -72,8 +73,8 @@ fun MyApp(
         startDestination = if (mainViewModel.isLogin.value) "ChoosingScreen" else "AboutScreen"
     ) {
         composable("MainScreen") { EntireMainScreen(navController = navController) }
-        composable("LinkScreen") {LinkScreen(navController = navController)}
-        composable("AnswerScreen") {AnswerScreen(navController = navController)}
+        composable("LinkScreen") { LinkScreen(navController = navController) }
+        composable("AnswerScreen") { AnswerScreen(navController = navController) }
         composable("AddingScreen") { AddingScreen(navController) }
         composable("ChoosingScreen") { ChoosingScreen(navController = navController) }
         composable("SearchScreen") { SearchScreen(navController) }
@@ -81,8 +82,14 @@ fun MyApp(
         composable("LoginScreen") { LoginScreen(navController, mainViewModel = mainViewModel) }
         composable("SignUpScreen") { SignupScreen(navController) }
         composable(
-            "DetailScreen/{id}",
-            arguments = listOf(navArgument("id") {type = NavType.IntType})
+            "CreatedLinkScreen&title={title}",
+            arguments = listOf(navArgument("title") { type = NavType.StringType })
+        ) {
+            val title = it.arguments?.getString("title")
+            CreatedLinkScreen(navController = navController, title = title)
+        }
+        composable(
+            "DetailScreen/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) {
             val id = it.arguments?.getInt("id") ?: 0
             DetailScreen(navController = navController, id = id)
@@ -102,6 +109,7 @@ fun checkInternetConnection(context: Context): Boolean {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val network = connectivityManager.activeNetwork ?: return false
     val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || capabilities.hasTransport(
+        NetworkCapabilities.TRANSPORT_WIFI
+    )
 }

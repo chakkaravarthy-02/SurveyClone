@@ -85,7 +85,8 @@ class MainViewModel(context: Context) : ViewModel() {
                                 answeredToOptionC = document.get("answeredToOptionC") as? Int,
                                 answeredToOptionD = document.get("answeredToOptionD") as? Int,
                                 visits = document.get("visits") as? Int,
-                                createdAt = document.getLong("createdAt")
+                                createdAt = document.getLong("createdAt"),
+                                link = document.getString("link")
                             )
                         }
                         _list.value += getSurvey

@@ -50,9 +50,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.zohosurvey.R
+import com.example.zohosurvey.util.encode
 import com.example.zohosurvey.viewmodelfactorys.DetailFactory
 import com.example.zohosurvey.viewmodels.DetailViewModel
 import com.example.zohosurvey.viewmodels.MainViewModel
+import java.net.URLEncoder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -402,6 +404,7 @@ fun DetailScreen(
                                         containerColor = Color(0xFFFE5B54)
                                     ), onClick = {
                                         detailViewModel.publishThisSurvey(title = surveyList[id].title.toString())
+                                        navController.navigate("CreatedLinkScreen&title=${surveyList[id].title}")
                                     }) {
                                     Text(text = "Publish")
                                 }

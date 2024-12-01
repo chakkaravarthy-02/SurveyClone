@@ -24,7 +24,7 @@ class DetailViewModel(context: Context) : ViewModel() {
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
     private val preferencesManager = SharedPreferencesManager(context)
-    val username = preferencesManager.getUser()
+    private val username = preferencesManager.getUser()
 
     fun deleteSurvey(title: String) {
         db.collection("users")
@@ -107,7 +107,8 @@ class DetailViewModel(context: Context) : ViewModel() {
                                 answeredToOptionC = document.get("answeredToOptionC") as? Int,
                                 answeredToOptionD = document.get("answeredToOptionD") as? Int,
                                 visits = document.get("visits") as? Int,
-                                createdAt = document.getLong("createdAt")
+                                createdAt = document.getLong("createdAt"),
+                                link = document.getString("link")
                             )
                         }
                         _list.value += getSurvey
