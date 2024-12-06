@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -53,7 +53,6 @@ fun AnswerScreen(
 ) {
 
     val pagerState = rememberPagerState()
-    val context = LocalContext.current
 
     val list by answerViewModel.questions.collectAsState()
 
@@ -82,7 +81,7 @@ fun AnswerScreen(
                     IconButton(onClick = {
                         navController.navigate("AddingScreen")
                     }) {
-                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back")
                     }
                 }
             )
