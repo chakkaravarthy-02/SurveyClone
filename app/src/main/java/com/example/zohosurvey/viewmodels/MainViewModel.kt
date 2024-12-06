@@ -31,14 +31,18 @@ class MainViewModel(context: Context) : ViewModel() {
 
     fun updateOptionInFilter(option: String) {
         selectedOption = option
+
+        if (option == "All") {
+            _list.value = _tempList.value
+        }
         if (option == "Published") {
-            _list.value = _list.value.filter { it.isPublished == true }
+            _list.value = _tempList.value.filter { it.isPublished == true }
         }
         if (option == "Draft") {
-            _list.value = _list.value.filter { it.isPublished == false }
+            _list.value = _tempList.value.filter { it.isPublished == false }
         }
         if (option == "Closed") {
-            _list.value = _list.value.filter { it.status == "Closed" }
+            _list.value = _tempList.value.filter { it.status == "Closed" }
         }
     }
 
@@ -58,6 +62,8 @@ class MainViewModel(context: Context) : ViewModel() {
 
     private val _list = MutableStateFlow<List<GetSurvey>>(emptyList())
     val list: StateFlow<List<GetSurvey>> = _list
+
+    private val _tempList = MutableStateFlow<List<GetSurvey>>(emptyList())
 
     init {
         scope.launch {
@@ -93,6 +99,7 @@ class MainViewModel(context: Context) : ViewModel() {
                         )
                     }
                     _list.value += getSurvey
+                    _tempList.value = _list.value
                 } catch (e: Exception) {
                     println("Error in fetching $e")
                 }

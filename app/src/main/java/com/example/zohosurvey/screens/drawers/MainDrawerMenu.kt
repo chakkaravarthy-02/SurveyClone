@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.sharp.Settings
@@ -57,11 +58,18 @@ import com.example.zohosurvey.R
 import com.example.zohosurvey.screens.HorizontalLine
 import com.example.zohosurvey.screens.VerticalLine
 import com.example.zohosurvey.viewmodelfactorys.MainDrawerFactory
+import com.example.zohosurvey.viewmodelfactorys.MainFactory
 import com.example.zohosurvey.viewmodels.MainDrawerViewModel
+import com.example.zohosurvey.viewmodels.MainViewModel
 
 @Composable
-fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, onDepartmentClicked: () -> Unit,mainDrawerViewModel: MainDrawerViewModel = viewModel(factory = MainDrawerFactory(
-    LocalContext.current))) {
+fun DrawerContent(
+    navController: NavHostController,
+    onItemClicked: () -> Unit,
+    onDepartmentClicked: () -> Unit,
+    mainDrawerViewModel: MainDrawerViewModel = viewModel(factory = MainDrawerFactory(LocalContext.current)),
+    mainViewModel: MainViewModel = viewModel(factory = MainFactory(LocalContext.current))
+) {
 
     val widthDp = 400.dp
     val emailState by mainDrawerViewModel.email.observeAsState()
@@ -145,7 +153,7 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
                             onDepartmentClicked()
                         }) {
                             Icon(
-                                imageVector = Icons.Filled.KeyboardArrowRight,
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                 contentDescription = "keyboard right arrow"
                             )
                         }
@@ -180,6 +188,7 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
                             modifier = Modifier
                                 .clickable {
                                     onItemClicked()
+                                    mainViewModel.updateOptionInFilter("All")
                                 }
                                 .align(Alignment.CenterHorizontally)
                                 .padding(start = 8.dp), text = "Total Surveys"
@@ -201,6 +210,7 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
                                 modifier = Modifier
                                     .clickable {
                                         onItemClicked()
+                                        mainViewModel.updateOptionInFilter("Published")
                                     }
                                     .align(Alignment.CenterVertically)
                                     .padding(start = 8.dp), text = "Published"
@@ -216,6 +226,7 @@ fun DrawerContent(navController: NavHostController,onItemClicked: () -> Unit, on
                                 modifier = Modifier
                                     .clickable {
                                         onItemClicked()
+                                        mainViewModel.updateOptionInFilter("Draft")
                                     }
                                     .align(Alignment.CenterVertically)
                                     .padding(start = 8.dp), text = "Drafts"

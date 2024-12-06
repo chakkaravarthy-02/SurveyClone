@@ -174,7 +174,6 @@ fun EntireMainScreen(
     )
 ) {
     val surveyList by viewModel.list.collectAsState()
-    println(surveyList + "^")
     val context = LocalContext.current
     val isConnected = rememberSaveable {
         mutableStateOf(checkInternetConnection(context))

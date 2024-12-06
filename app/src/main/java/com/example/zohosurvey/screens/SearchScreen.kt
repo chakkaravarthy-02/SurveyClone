@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -129,7 +130,7 @@ fun SearchScreen(
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            if(list.value.isNotEmpty()){
+            if (list.value.isNotEmpty()) {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     val temp = list.value
                     itemsIndexed(temp) { index, item ->
@@ -143,7 +144,7 @@ fun SearchScreen(
                     }
                 }
             } else {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
     }

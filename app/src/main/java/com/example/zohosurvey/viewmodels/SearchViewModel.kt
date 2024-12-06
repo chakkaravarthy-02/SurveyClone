@@ -18,7 +18,7 @@ import kotlinx.coroutines.tasks.await
 class SearchViewModel(context: Context) : ViewModel() {
 
     fun filterByTitle(searchText: String) {
-        _list.value = _list.value.filter {
+        _list.value = _tempList.value.filter {
             it.title?.contains(searchText.lowercase().trim() ?: " ") == true
         }
     }
@@ -27,6 +27,8 @@ class SearchViewModel(context: Context) : ViewModel() {
 
     private val _list = MutableStateFlow<List<GetSurvey>>(emptyList())
     val list: StateFlow<List<GetSurvey>> = _list
+
+    private val _tempList = MutableStateFlow<List<GetSurvey>>(emptyList())
 
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.IO + job)
@@ -68,6 +70,7 @@ class SearchViewModel(context: Context) : ViewModel() {
                         )
                     }
                     _list.value += getSurvey
+                    _tempList.value += _list.value
                 } catch (e: Exception) {
                     println("Error in fetching $e")
                 }

@@ -15,12 +15,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Suppress("unchecked_cast")
 class AnswerViewModel(context: Context): ViewModel() {
 
     fun filterList(list: List<GetSurvey>, link: String?): GetSurvey?{
-        return list.find { it.link == link }
+        return list.find { URLDecoder.decode(it.link, StandardCharsets.UTF_8.toString()) == link }
     }
 
     fun setListToNull(pages: Long) {
@@ -37,6 +39,11 @@ class AnswerViewModel(context: Context): ViewModel() {
 
     fun updateAnswers(survey: GetSurvey?, value: List<String>) {
         var index = 0
+        var response = 0
+        if(survey?.response!=null){
+            response = survey.response ?: 0
+        }
+        response++
         val answerMap = survey?.answerData
         answerMap?.forEach { map ->
             map.forEach { (key, currentValue) ->
@@ -47,7 +54,8 @@ class AnswerViewModel(context: Context): ViewModel() {
             index++
         }
         val updatedAnswer = mapOf(
-            "answerData" to answerMap
+            "answerData" to answerMap,
+            "response" to response
         )
 
         scope.launch{

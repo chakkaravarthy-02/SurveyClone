@@ -1,19 +1,19 @@
 package com.example.zohosurvey.util
 
-fun String.encode(): String{
+fun String.encode(): String {
     val str = this
     var encoded = ""
-    for(i in str.indices){
-        encoded+=str[i]+1
+    for (i in str.indices) {
+        encoded += str[i] + 1
     }
     return encoded
 }
 
-fun String.decode(): String{
+fun String.decode(): String {
     val str = this
     var decoded = ""
-    for(i in str.indices){
-        decoded+=str[i]-1
+    for (i in str.indices) {
+        decoded += str[i] - 1
     }
     return decoded
 }

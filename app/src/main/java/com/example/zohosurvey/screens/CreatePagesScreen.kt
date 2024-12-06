@@ -57,7 +57,6 @@ fun PagesScreen(
     )
 ) {
     val item = mutableListOf(1)
-    val context = LocalContext.current
 
     val questions = pagesViewModel.questions
 

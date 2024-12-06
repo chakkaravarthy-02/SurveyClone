@@ -88,6 +88,7 @@ fun AnswerScreen(
             Spacer(modifier = Modifier.padding(2.dp))
             if(list.isNotEmpty()){
                 val survey = answerViewModel.filterList(list, link)
+                println("$survey()")
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
