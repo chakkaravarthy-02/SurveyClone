@@ -66,6 +66,15 @@ class PagesViewModel(context: Context): ViewModel() {
             )
         }
 
+        val answerData = _questions.map{ _ ->
+            mutableMapOf(
+                "optionA" to 0,
+                "optionB" to 0,
+                "optionC" to 0,
+                "optionD" to 0
+            )
+        }
+
         val fileId = title.encode()
 
         val link = generateLink(fileId)
@@ -81,10 +90,7 @@ class PagesViewModel(context: Context): ViewModel() {
             "completed" to 0,
             "pages" to questionData.size,
             "responseTime" to formattedDate,
-            "answeredToOptionA" to 0,
-            "answeredToOptionB" to 0,
-            "answeredToOptionC" to 0,
-            "answeredToOptionD" to 0,
+            "answerData" to answerData,
             "visits" to 0,
             "modifiedTime" to formattedTime,
             "createdAt" to System.currentTimeMillis(),

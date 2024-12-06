@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Modifier
@@ -55,6 +56,7 @@ import com.example.zohosurvey.viewmodelfactorys.DetailFactory
 import com.example.zohosurvey.viewmodels.DetailViewModel
 import com.example.zohosurvey.viewmodels.MainViewModel
 import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -247,6 +249,7 @@ fun DetailScreen(
                     }
                 }
                 Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .padding(start = 16.dp, top = 16.dp, end = 16.dp)
                         .fillMaxWidth()
@@ -345,7 +348,10 @@ fun DetailScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(fontSize = 12.sp, text = "View Survey", color = Color.Gray)
-                                    IconButton(onClick = {}) {
+                                    IconButton(onClick = {
+                                        val encodedLink = URLEncoder.encode(surveyList[id].link, StandardCharsets.UTF_8.toString())
+                                        navController.navigate("AnswerScreen/${encodedLink}")
+                                    }) {
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                             contentDescription = "go to survey"
@@ -411,7 +417,7 @@ fun DetailScreen(
                             }
                         }
                     } else {
-                        Text(modifier = Modifier.align(Alignment.Center), text = "Loading...")
+                        CircularProgressIndicator()
                     }
                 }
             }

@@ -1,10 +1,6 @@
 package com.example.zohosurvey.viewmodels
 
 import android.content.Context
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.zohosurvey.util.GetSurvey
 import com.example.zohosurvey.util.SharedPreferencesManager
@@ -17,51 +13,30 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.util.concurrent.TimeUnit
 
 @Suppress("unchecked_cast")
-class MainViewModel(context: Context) : ViewModel() {
-    var selectedOption by mutableStateOf("All")
-        private set
+class SearchViewModel(context: Context) : ViewModel() {
 
-    private val job = Job()
-    private val scope = CoroutineScope(Dispatchers.IO + job)
+    fun filterByTitle(searchText: String) {
+        _list.value = _list.value.filter {
+            it.title?.contains(searchText.lowercase().trim() ?: " ") == true
+        }
+    }
 
     private val db = Firebase.firestore
-
-    fun updateOptionInFilter(option: String) {
-        selectedOption = option
-        if (option == "Published") {
-            _list.value = _list.value.filter { it.isPublished == true }
-        }
-        if (option == "Draft") {
-            _list.value = _list.value.filter { it.isPublished == false }
-        }
-        if (option == "Closed") {
-            _list.value = _list.value.filter { it.status == "Closed" }
-        }
-    }
-
-    private val _isLogin = mutableStateOf(false)
-    val isLogin: MutableState<Boolean> get() = _isLogin
-
-    private val preferencesManager = SharedPreferencesManager(context)
-
-    fun checkUserLoggedIn() {
-        val (username, lastLogin) = preferencesManager.getUserDetails()
-
-        _isLogin.value =
-            username != null && lastLogin != 0L && System.currentTimeMillis() - lastLogin < TimeUnit.HOURS.toMillis(
-                24
-            )
-    }
 
     private val _list = MutableStateFlow<List<GetSurvey>>(emptyList())
     val list: StateFlow<List<GetSurvey>> = _list
 
+    private val job = Job()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
+
+    private val preferencesManager = SharedPreferencesManager(context)
+    private val username = preferencesManager.getUser()
+
     init {
+        println("detail init")
         scope.launch {
-            val username = preferencesManager.getUser()
             if (username != null) {
                 try {
                     val documents = db.collection("users")

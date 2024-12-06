@@ -33,6 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,7 +109,8 @@ fun LinkScreen(modifier: Modifier = Modifier, navController: NavController) {
                     containerColor = Color(0xFFFE5B54),
                     contentColor = Color.White
                 ), onClick = {
-                    navController.navigate("AnswerScreen")
+                    val encodedLink = URLEncoder.encode(linkText, StandardCharsets.UTF_8.toString())
+                    navController.navigate("AnswerScreen/$encodedLink")
                 }) {
                 Text(text = "Submit")
             }

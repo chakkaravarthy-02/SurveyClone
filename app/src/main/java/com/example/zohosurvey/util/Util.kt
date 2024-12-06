@@ -31,10 +31,7 @@ data class GetSurvey(
     var completed: Int?,
     var pages: Long?,
     var responseTime: String?,
-    var answeredToOptionA: Int?,
-    var answeredToOptionB: Int?,
-    var answeredToOptionC: Int?,
-    var answeredToOptionD: Int?,
+    var answerData: List<MutableMap<String, Int>>?,
     var visits: Int?,
     var createdAt: Long?,
     var link: String?

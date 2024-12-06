@@ -35,20 +35,22 @@ class MainDrawerViewModel(context: Context): ViewModel() {
     var draft = 0
 
     init {
-        db.collection("users")
-            .document(sharedPreferences.getUser().toString())
-            .collection("files")
-            .get()
-            .addOnSuccessListener {
-                for (document in it){
-                    count++
-                    if(document.getBoolean("isPublished") == true){
-                        published++
-                    }else{
-                        draft++
+        viewModelScope.launch{
+            db.collection("users")
+                .document(sharedPreferences.getUser().toString())
+                .collection("files")
+                .get()
+                .addOnSuccessListener {
+                    for (document in it) {
+                        count++
+                        if (document.getBoolean("isPublished") == true) {
+                            published++
+                        } else {
+                            draft++
+                        }
                     }
                 }
-            }
+        }
     }
 
     init {

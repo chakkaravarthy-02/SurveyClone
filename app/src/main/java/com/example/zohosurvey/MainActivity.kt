@@ -33,10 +33,22 @@ import com.example.zohosurvey.ui.theme.ZohoSurveyTheme
 import com.example.zohosurvey.viewmodelfactorys.MainFactory
 import com.example.zohosurvey.viewmodels.MainViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import android.content.Intent
+import android.net.Uri
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // ATTENTION: This was auto-generated to handle app links.
+        val appLinkIntent: Intent = intent
+        val appLinkAction: String? = appLinkIntent.action
+        val appLinkData: Uri? = appLinkIntent.data
+
+        if (appLinkData != null) {
+            println("*^@${appLinkData.lastPathSegment}")
+        }
         setContent {
             ZohoSurveyTheme {
                 MyApp()
@@ -74,7 +86,14 @@ fun MyApp(
     ) {
         composable("MainScreen") { EntireMainScreen(navController = navController) }
         composable("LinkScreen") { LinkScreen(navController = navController) }
-        composable("AnswerScreen") { AnswerScreen(navController = navController) }
+        composable(
+            "AnswerScreen/{link}",
+            arguments = listOf(navArgument("link"){type = NavType.StringType})
+        ) {
+            val encodedLink = it.arguments?.getString("link")
+            val link = URLDecoder.decode(encodedLink, StandardCharsets.UTF_8.toString())
+            AnswerScreen(navController = navController, link = link)
+        }
         composable("AddingScreen") { AddingScreen(navController) }
         composable("ChoosingScreen") { ChoosingScreen(navController = navController) }
         composable("SearchScreen") { SearchScreen(navController) }

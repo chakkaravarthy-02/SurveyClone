@@ -35,6 +35,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalNavigationDrawer
@@ -158,7 +159,6 @@ fun FilterDialog(onClick: () -> Unit, viewModel: MainViewModel = viewModel()) {
                     )
                 }
             }
-
         }
     }
 }
@@ -174,7 +174,7 @@ fun EntireMainScreen(
     )
 ) {
     val surveyList by viewModel.list.collectAsState()
-    println(surveyList+"^")
+    println(surveyList + "^")
     val context = LocalContext.current
     val isConnected = rememberSaveable {
         mutableStateOf(checkInternetConnection(context))
@@ -194,7 +194,6 @@ fun EntireMainScreen(
             context.unregisterReceiver(receiver)
         }
     }
-    val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val openDrawer = rememberDrawerState(
         initialValue = DrawerValue.Closed
@@ -249,8 +248,14 @@ fun EntireMainScreen(
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             val list = surveyList
-                            itemsIndexed(list) {index,item ->
-                                ListRow(list = list,viewModel = viewModel,index = index,getSurvey = item,navController = navController)
+                            itemsIndexed(list) { index, item ->
+                                ListRow(
+                                    list = list,
+                                    index = index,
+                                    getSurvey = item,
+                                    navController = navController
+                                )
+                                HorizontalLine()
                             }
                         }
                     }
@@ -287,10 +292,8 @@ fun EntireMainScreen(
 @Composable
 fun ListRow(
     getSurvey: GetSurvey,
-    modifier: Modifier = Modifier,
     navController: NavHostController,
     index: Int,
-    viewModel: MainViewModel,
     list: List<GetSurvey>
 ) {
     Row(
@@ -310,11 +313,19 @@ fun ListRow(
             Spacer(modifier = Modifier.padding(6.dp))
             Row {
                 Text(fontSize = 11.sp, color = Color.LightGray, text = "Last modified on: ")
-                Text(fontSize = 11.sp, color = Color.LightGray, text = getSurvey.modified.toString())
-                Text(fontSize = 11.sp, text = getSurvey.modifiedTime.toString(), color = Color.LightGray)
+                Text(
+                    fontSize = 11.sp,
+                    color = Color.LightGray,
+                    text = getSurvey.modified.toString()
+                )
+                Text(
+                    fontSize = 11.sp,
+                    text = getSurvey.modifiedTime.toString(),
+                    color = Color.LightGray
+                )
             }
             Spacer(modifier = Modifier.padding(2.dp))
-            if (list[index].isPublished==true) {
+            if (list[index].isPublished == true) {
                 Row {
                     Text(fontSize = 11.sp, color = Color.LightGray, text = "Latest response on: ")
                     Text(fontSize = 11.sp, text = "oct 13,2024", color = Color.LightGray)
@@ -351,20 +362,20 @@ fun ListRow(
 
 @Composable
 fun VerticalLine(value: Int) {
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp,
+    HorizontalDivider(
         modifier = Modifier
             .height(value.dp)
-            .width(1.dp)
+            .width(1.dp),
+        thickness = 1.dp,
+        color = Color.LightGray
     )
 }
 
 @Composable
 fun HorizontalLine() {
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp
+    HorizontalDivider(
+        thickness = 1.dp,
+        color = Color.LightGray
     )
 }
 
@@ -372,10 +383,25 @@ fun HorizontalLine() {
 @Composable
 private fun ListPreview() {
     ListRow(
-        GetSurvey("", listOf(mapOf("" to "")),"",9,"",false,"","",9,9,"",9,9,9,9,9,9,""),
+        GetSurvey(
+            "",
+            listOf(mapOf("" to "")),
+            "",
+            9,
+            "",
+            false,
+            "",
+            "",
+            9,
+            9,
+            "",
+            listOf(mutableMapOf()),
+            9,
+            9,
+            ""
+        ),
         navController = rememberNavController(),
         index = 0,
-        viewModel = viewModel(),
         list = listOf()
     )
 }

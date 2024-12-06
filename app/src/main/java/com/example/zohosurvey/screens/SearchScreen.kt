@@ -6,9 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,6 +22,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,14 +32,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.zohosurvey.viewmodelfactorys.SearchFactory
+import com.example.zohosurvey.viewmodels.SearchViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavHostController, modifier: Modifier = Modifier) {
+fun SearchScreen(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    searchViewModel: SearchViewModel = viewModel(
+        factory = SearchFactory(
+            LocalContext.current
+        )
+    )
+) {
+    val list = searchViewModel.list.collectAsState()
     val focusRequester = remember {
         FocusRequester()
     }
@@ -42,7 +60,7 @@ fun SearchScreen(navController: NavHostController, modifier: Modifier = Modifier
         mutableStateOf("")
     }
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
     Column {
@@ -54,7 +72,9 @@ fun SearchScreen(navController: NavHostController, modifier: Modifier = Modifier
             ),
             title = {
                 TextField(
-                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -72,7 +92,7 @@ fun SearchScreen(navController: NavHostController, modifier: Modifier = Modifier
                         searchText = newText
                     },
                     trailingIcon = {
-                        if(searchText.isNotEmpty()) {
+                        if (searchText.isNotEmpty()) {
                             IconButton(onClick = {
                                 searchText = ""
                             }) {
@@ -95,13 +115,36 @@ fun SearchScreen(navController: NavHostController, modifier: Modifier = Modifier
                 }) {
                     Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "back")
                 }
+            },
+            actions = {
+                IconButton(onClick = {
+                    searchViewModel.filterByTitle(searchText)
+                }) {
+                    Icon(imageVector = Icons.Filled.Search, contentDescription = "search")
+                }
             }
         )
-        Box (modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-        ){
-            //TODO("get data from database")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            if(list.value.isNotEmpty()){
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    val temp = list.value
+                    itemsIndexed(temp) { index, item ->
+                        ListRow(
+                            list = temp,
+                            index = index,
+                            getSurvey = item,
+                            navController = navController
+                        )
+                        HorizontalLine()
+                    }
+                }
+            } else {
+                CircularProgressIndicator()
+            }
         }
     }
 }
