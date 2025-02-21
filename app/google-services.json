@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "886685757576",
+    "firebase_url": "https://surveyz-33c70-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "surveyz-33c70",
+    "storage_bucket": "surveyz-33c70.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:886685757576:android:a10c23eaddb5d64cd76f3d",
+        "android_client_info": {
+          "package_name": "com.example.zohosurvey"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "886685757576-8tc06i9ukorm37g1mudh7ph519kphnda.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.zohosurvey",
+            "certificate_hash": "50c76edc76aae646a32f84019f5d736089e88a1e"
+          }
+        },
+        {
+          "client_id": "886685757576-tp9hi6lkj6dm62gmlcuea2uk8qbnhglr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6TVHuMQWBkB0_vliLc5HrSD3QrNqRJps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "886685757576-tp9hi6lkj6dm62gmlcuea2uk8qbnhglr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

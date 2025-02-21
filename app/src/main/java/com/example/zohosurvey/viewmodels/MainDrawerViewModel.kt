@@ -35,6 +35,7 @@ class MainDrawerViewModel(context: Context): ViewModel() {
     var draft = 0
 
     init {
+        fetchUserDetails()
         viewModelScope.launch{
             db.collection("users")
                 .document(sharedPreferences.getUser().toString())
@@ -51,10 +52,6 @@ class MainDrawerViewModel(context: Context): ViewModel() {
                     }
                 }
         }
-    }
-
-    init {
-        fetchUserDetails() // Fetch user details when ViewModel is initialized
     }
 
     private fun fetchUserDetails() {
